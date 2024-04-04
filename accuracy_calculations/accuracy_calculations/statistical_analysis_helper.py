@@ -91,6 +91,8 @@ def analyse_dispersion(data_series: pd.Series, window_length: int, options: Accu
         approximation_curve = regression_values(rolling_window, options)
 
     moving_std = rolling_window.std(ddof=0)
-    z_score = data_series.sub(approximation_curve).div(moving_std)
+
+    # NaN können nur entstehen wenn durch 0 geteilt wird. Dann wird der z-Score auch mit 0 bewertet.
+    z_score = data_series.sub(approximation_curve).div(moving_std).fillna(0)
 
     return approximation_curve, z_score
