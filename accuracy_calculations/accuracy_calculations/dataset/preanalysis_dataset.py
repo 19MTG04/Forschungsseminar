@@ -6,18 +6,18 @@ filepath = get_project_root() / 'dataset' / 'Prueflauf_23065.tdm'
 data_file = tdm_loader.OpenFile(filepath)
 print(data_file)
 
-# Bei 0, 1, 2, 3, 4, 6, 235 sind keine Daten
-# In Spalte 29 fehlen bei 5, 7 Daten (Indizes beginnen bei 0!)
-# In Spalte 30 und 31 fehlen bei 5, 7, 8, 9, 10, 11, 12, 13, 14 Daten (Indizes beginnen bei 0!)
 
-# Spalte 32, 33, 34, 35 existieren nur bei 21, 26, 34 (Indizes beginnen bei 0!)
+channel_dict = {}
 
 for i in range(0, 328):
-    for n in range(31, 32):
-        try:
-            data_file.channel(i, n)
-        except (IndexError):
-            print(f'{i}, {n}')
+    channel_count = data_file.no_channels(i)
+    if channel_count not in channel_dict:
+        channel_dict[channel_count] = []
+    channel_dict[channel_count].append(i)
+
+for key, value in channel_dict.items():
+    print(f"Channels with {key} elements:", value)
+
 
 # TODO: Wo ist zB das Drehmoment?
 # TODO: Beliebiges Drehmoment extrahieren und visualisieren
