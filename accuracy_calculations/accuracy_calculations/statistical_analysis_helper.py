@@ -62,6 +62,11 @@ def optimize_window_length(data_series: pd.Series) -> int:
         # Empirisch. R2 soll etwas stärker gewichtet sein, als die Glättung
         return -(change_rate - 1.3 * r2)**2
 
+    # Die minimale Datenlänge muss 30 betragen, damit die optimale Fensterlänge sinnvoll berechnet werden kann.
+    if len(data_series) < 30:
+        raise ValueError(f'Die Datenlänge beträgt lediglich {len(
+            data_series)}, für eine sinnvolle Berechnung der Fensterlänge muss sie mindestens 30 betragen.')
+
     # Minimierung der Kostenfunktion. R^2 soll möglichst groß sein, während eine Glatte Approximation vorliegen soll.
     result = minimize_scalar(loss_function, bounds=(
         10, len(data_series) / 3), method='bounded', options={'maxiter': 100})
