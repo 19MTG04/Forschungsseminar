@@ -64,7 +64,7 @@ def optimize_window_length(data_series: pd.Series) -> int:
 
     # Minimierung der Kostenfunktion. R^2 soll möglichst groß sein, während eine Glatte Approximation vorliegen soll.
     result = minimize_scalar(loss_function, bounds=(
-        5, len(data_series)), method='bounded', options={'maxiter': 100})
+        10, len(data_series) / 3), method='bounded', options={'maxiter': 100})
     optimal_window_length = round(result.x)
 
     return optimal_window_length
