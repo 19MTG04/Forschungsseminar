@@ -1,14 +1,17 @@
 import pandas as pd
 import numpy as np
+import tdm_loader
+
 from accuracy_calculations.missing_data import detect_missing_data
 from accuracy_calculations.outliers_no_comp import detect_outliers_intrinsic
 from accuracy_calculations.dispersion_no_comp import analyse_dispersion_intrinsic
 from accuracy_calculations.accuracy_calculation_options import AccuracyCalculationOptions
+from accuracy_calculations.misc.path_helper import get_project_root
 
 # TODO: Ich nutze nicht die Berechnung der Standardabweichung für eine Stichprobe bisher. Sollte ich? (ddof=0 im Moment, bei Testdaten besser)
 # TODO: Im Bericht steht als Konfidenzintervall 95%. Eher 99% nutzen wie hier im Code oder?
 # TODO: 2.1.5 ist im Bericht tendenziell falsch mit den Formeln. Pi/2 und besser beschreiben wie es im Code ist.
-# TODO: NaN-Handling ist bisher nicht explizit betrachtet worden!
+# TODO: NaN-Handling ist bisher nicht überall explizit betrachtet worden!
 # TODO: Womöglich ist das Handling mit pd.tseries besser als mit pd.Series!
 
 
@@ -41,4 +44,17 @@ if __name__ == '__main__':
 
         print(f'Genauigkeits-Score: {accuracy_score:.2f}')
 
-    main()
+    # main()
+
+    filepath = get_project_root() / 'dataset' / 'Prueflauf_23065.tdm'
+    data_file = tdm_loader.OpenFile(filepath)
+
+    channel_group = 214
+
+    data_series = pd.Series(data_file.channel(
+        channel_group, "Antrieb 1  Drehzahl"))
+    options = AccuracyCalculationOptions(plot_outliers=True)
+    accuracy_score = calculate_accuracy_score(
+        data_series, pd.DataFrame(None), options)
+
+    print(f'Genauigkeits-Score: {accuracy_score:.2f}')
