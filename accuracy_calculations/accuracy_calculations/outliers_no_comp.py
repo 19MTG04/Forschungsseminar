@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from accuracy_calculations.accuracy_calculation_options import AccuracyCalculationOptions
-from accuracy_calculations.statistical_analysis_helper import optimize_window_length, analyse_dispersion
+from accuracy_calculations.statistical_analysis_helper import optimize_window_length, analyse_dispersion, get_outlier_mask
 
 
 def detect_outliers_intrinsic(data_series: pd.Series, options: AccuracyCalculationOptions) -> Tuple[float, int, pd.Series, pd.Series]:
@@ -24,16 +24,11 @@ def detect_outliers_intrinsic(data_series: pd.Series, options: AccuracyCalculati
 def get_outlier_stats(z_score: pd.Series, options: AccuracyCalculationOptions) -> Tuple[int, float, pd.Series]:
     """ Bestimmung der Ausreißeranzahl und -rate.
     """
-    within_threshold = z_score.between(-options.threshold_outliers,
-                                       options.threshold_outliers)
+    within_threshold = get_outlier_mask(z_score, options)
 
     number_outlieres = len(within_threshold) - within_threshold.sum()
     outlier_rate = number_outlieres / len(within_threshold)
     return number_outlieres, outlier_rate, within_threshold
-
-
-def return_without_outliers(data_series: pd.Series, approximation_curve: pd.Series, within_threshold: pd.Series) -> pd.Series:
-    return data_series.where(within_threshold, approximation_curve)
 
 
 def plot_outliers(data_series: pd.Series, approximation_curve: pd.Series, outlier_mask: pd.Series) -> None:
@@ -62,9 +57,6 @@ if __name__ == '__main__':
         print(
             f'Anzahl der Ausreißer: {num_outliers}')
         print(f'Anteil ausreißerfreier Daten: {(1 - outlier_rate) * 100}%')
-
-        _ = return_without_outliers(
-            data_series, approximation, outlier_mask)
 
         plot_outliers(data_series, approximation, outlier_mask)
 

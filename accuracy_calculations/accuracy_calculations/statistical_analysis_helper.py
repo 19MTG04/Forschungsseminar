@@ -96,3 +96,15 @@ def analyse_dispersion(data_series: pd.Series, window_length: int, options: Accu
     z_score = data_series.sub(approximation_curve).div(moving_std).fillna(0)
 
     return approximation_curve, z_score
+
+
+def get_outlier_mask(z_score: pd.Series, options: AccuracyCalculationOptions) -> pd.Series:
+    within_threshold = z_score.between(-options.threshold_outliers,
+                                       options.threshold_outliers)
+
+    return within_threshold
+
+
+def return_without_outliers(data_series: pd.Series, approximation_curve: pd.Series, z_score: pd.Series, options: AccuracyCalculationOptions) -> pd.Series:
+    within_threshold = get_outlier_mask(z_score, options)
+    return data_series.where(within_threshold, approximation_curve)
