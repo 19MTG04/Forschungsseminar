@@ -29,37 +29,19 @@ def get_dispersion_stats(data_series: pd.Series, approximation: pd.Series,
     approximation_rolling_window = approximation.rolling(
         window=window_length, min_periods=1, center=True)
 
-    difference_start_end_approx_windows = abs(approximation_rolling_window.apply(
-        calculate_difference_window_start_end))
-    absolute_difference_sum_data = data_rolling_window.apply(
-        calculate_sum_absolute_difference_between_each_window_entry)
+    data_std = data_rolling_window.std()
+    approximation_std = approximation_rolling_window.std()
+    std_difference = (data_std - approximation_std).abs()
+    mean_percentage_deviation = std_difference.mean() / approximation.max() * 100
 
-    # Dieses Verhältnis wird klein (nahe 0) für verrauschte und groß (nahe 1) für weniger verrauschte Zeitreihen.
-    # Das liegt daran, dass die Differenz von Start und Ende der Fenster der Approximation relativ resistent gegen das Rauschen ist
-    # und ein Maßstab dafür, wie viel Veränderung der Größenordnungen in den Daten rauschfrei zu erwarten ist.
-    # Im Gegensatz dazu ist bei Betrachtung der Unterschiede zwischen jedem Wert in jedem Fenster der Realdaten
-    # ein besonders großer Wert bei viel Rauschen zu erwarten.
-    ratio_dispersion = difference_start_end_approx_windows.sum() / \
-        absolute_difference_sum_data.sum()
-
-    # Empirische Gleichung zur Bewertung des vorher eingeführten Verhältnisses.
-    dispersion_score = (-np.exp(-4 * ratio_dispersion) + 1) / (-np.exp(-4) + 1)
+    # 1 / (x + 1) als Formel zur Bewertung des Scores, sodass:
+    # 0,01 % Abweichung zu ca. 0,99 als Score führen
+    # 0,1 % Abweichung zu ca. 0,9 als Score führen
+    # 1 % Abweichung zu ca. 0,5 als Score führen
+    # 10 % Abweichung zu ca. 0,1 als Score führen
+    dispersion_score = 1 / (mean_percentage_deviation + 1)
 
     return dispersion_score
-
-
-def calculate_difference_window_start_end(window: Any):
-    difference = window.iloc[-1] - window.iloc[0]
-    if np.isnan(difference):
-        raise ValueError("Unhandeld NaN")
-    return difference
-
-
-def calculate_sum_absolute_difference_between_each_window_entry(window: Any):
-    sum_abs_diff = window.diff().abs().sum()
-    if np.isnan(sum_abs_diff):
-        raise ValueError("Unhandeld NaN")
-    return sum_abs_diff
 
 
 if __name__ == '__main__':
