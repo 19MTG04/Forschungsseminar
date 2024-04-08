@@ -32,7 +32,8 @@ def regression_values(rolling_window: Any, options: AccuracyCalculationOptions) 
             raise ValueError(f"The given Dispersion Identification Mode {mode} \
                               is not implemented.")
 
-        poly_features = PolynomialFeatures(degree=degree)
+        # False gemäß: https://stackoverflow.com/questions/59725907/scikit-learn-polynomialfeatures-what-is-the-use-of-the-include-bias-option
+        poly_features = PolynomialFeatures(degree=degree, include_bias=False)
         X_poly = poly_features.fit_transform(X)
 
         model = LinearRegression()
