@@ -8,7 +8,7 @@ from accuracy_calculations.statistical_analysis_helper import optimize_window_le
 
 
 def detect_outliers_intrinsic(data_series: pd.Series, options: AccuracyCalculationOptions) -> Tuple[float, int, pd.Series, pd.Series]:
-    window_length = optimize_window_length(data_series)
+    window_length = optimize_window_length(data_series, options)
     approximation_curve, z_score = analyse_dispersion(
         data_series, window_length=window_length, options=options)
 

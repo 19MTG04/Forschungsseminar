@@ -21,6 +21,11 @@ class AccuracyCalculationOptions:
                                               Literal['regression_deg_1'],
                                               Literal['regression_deg_2'],
                                               Literal['regression_deg_3']] = 'regression_deg_1'
+    # Aufgrund des Rechenaufwandes wird hier der Durchschnitt als Default gesetzt.
+    mode_for_window_length_identification: Union[Literal['mean'],
+                                                 Literal['regression_deg_1'],
+                                                 Literal['regression_deg_2'],
+                                                 Literal['regression_deg_3']] = 'mean'
     threshold_outliers: float = 2.58
 
     plot_outliers: bool = False

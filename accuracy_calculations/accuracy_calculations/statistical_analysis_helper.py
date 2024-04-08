@@ -47,20 +47,24 @@ def regression_values(rolling_window: Any, options: AccuracyCalculationOptions) 
     return pd.Series(values)
 
 
-def optimize_window_length(data_series: pd.Series) -> int:
+def optimize_window_length(data_series: pd.Series, options: AccuracyCalculationOptions) -> int:
 
     def loss_function(window_length):
         rolling_window = data_series.rolling(
             window=round(float(window_length)), min_periods=1, center=True)
-        moving_average = rolling_window.mean()
 
-        whole_data_avg = data_series.mean()
-        r2 = sum((moving_average - whole_data_avg)**2) / \
+        if options.mode_for_window_length_identification == 'mean':
+            approximation = rolling_window.mean()
+        else:
+            approximation = regression_values(rolling_window, options)
+
+        r2 = sum((approximation - whole_data_avg)**2) / \
             sum((data_series - whole_data_avg)**2)
 
-        difference_one_value_to_next_avg = moving_average.diff().abs().dropna().sum()
+        difference_one_value_to_next_approx = approximation.diff().abs().dropna().sum()
         difference_one_value_to_next_data = data_series.diff().abs().dropna().sum()
-        change_rate = difference_one_value_to_next_avg / difference_one_value_to_next_data
+        change_rate = difference_one_value_to_next_approx / \
+            difference_one_value_to_next_data
 
         # Empirisch. R2 soll etwas stärker gewichtet sein, als die Glättung
         return -(change_rate - 1.3 * r2)**2
@@ -70,6 +74,7 @@ def optimize_window_length(data_series: pd.Series) -> int:
         raise ValueError(f'Die Datenlänge beträgt lediglich {len(
             data_series)}, für eine sinnvolle Berechnung der Fensterlänge muss sie mindestens 30 betragen.')
 
+    whole_data_avg = data_series.mean()
     # Minimierung der Kostenfunktion. R^2 soll möglichst groß sein, während eine Glatte Approximation vorliegen soll.
     result = minimize_scalar(loss_function, bounds=(
         10, len(data_series) / 3), method='bounded', options={'maxiter': 100})
