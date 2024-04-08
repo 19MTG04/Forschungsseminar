@@ -22,7 +22,9 @@ def regression_values(rolling_window: Any, options: AccuracyCalculationOptions) 
         mode = options.mode_for_dispersion_identification
 
         # Grad des Regressionspolynoms gemäß der Optionen auslesen
-        if mode == 'regression_deg_2':
+        if mode == 'regression_deg_1':
+            degree = 1
+        elif mode == 'regression_deg_2':
             degree = 2
         elif mode == 'regression_deg_3':
             degree = 3

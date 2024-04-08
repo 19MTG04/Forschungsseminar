@@ -18,8 +18,9 @@ class AccuracySubcategoryWeights:
 @dataclass
 class AccuracyCalculationOptions:
     mode_for_dispersion_identification: Union[Literal['mean'],
+                                              Literal['regression_deg_1'],
                                               Literal['regression_deg_2'],
-                                              Literal['regression_deg_3']] = 'mean'
+                                              Literal['regression_deg_3']] = 'regression_deg_1'
     threshold_outliers: float = 2.58
 
     plot_outliers: bool = False
