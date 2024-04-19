@@ -4,13 +4,12 @@ import pandas as pd
 
 
 from accuracy_calculations.accuracy_calculation_options import AccuracyCalculationOptions
-from accuracy_calculations.statistical_analysis_helper import optimize_window_length, analyse_dispersion, return_without_outliers
+from accuracy_calculations.statistical_analysis_helper import return_without_outliers, general_dispersion_analysis
 
 
-def analyse_dispersion_intrinsic(data_series: pd.Series, options: AccuracyCalculationOptions) -> Tuple[float, pd.Series]:
-    window_length = optimize_window_length(data_series, options)
-    approximation_curve, z_score = analyse_dispersion(
-        data_series, window_length=window_length, options=options)
+def analyse_dispersion_intrinsic_separately(data_series: pd.Series, options: AccuracyCalculationOptions) -> Tuple[float, pd.Series]:
+    window_length, approximation_curve, z_score = general_dispersion_analysis(
+        data_series, options)
 
     dispersion_score = get_dispersion_stats(
         data_series, approximation_curve, z_score, options, window_length)
@@ -54,7 +53,7 @@ if __name__ == '__main__':
 
         options = AccuracyCalculationOptions()
 
-        dispersion_score, _ = analyse_dispersion_intrinsic(
+        dispersion_score, _ = analyse_dispersion_intrinsic_separately(
             data_series, options)
 
         print(f'Streuungs-Score: {dispersion_score:.2f}')

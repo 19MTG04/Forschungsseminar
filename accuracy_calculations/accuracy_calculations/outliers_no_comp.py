@@ -4,21 +4,26 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from accuracy_calculations.accuracy_calculation_options import AccuracyCalculationOptions
-from accuracy_calculations.statistical_analysis_helper import optimize_window_length, analyse_dispersion, get_outlier_mask
+from accuracy_calculations.statistical_analysis_helper import get_outlier_mask, general_dispersion_analysis
 
 
-def detect_outliers_intrinsic(data_series: pd.Series, options: AccuracyCalculationOptions) -> Tuple[float, int, pd.Series, pd.Series]:
-    window_length = optimize_window_length(data_series, options)
-    approximation_curve, z_score = analyse_dispersion(
-        data_series, window_length=window_length, options=options)
+def detect_outliers_intrinsic_separately(data_series: pd.Series, options: AccuracyCalculationOptions) -> Tuple[float, int, pd.Series, pd.Series]:
+    _, approximation_curve, z_score = general_dispersion_analysis(
+        data_series, options)
 
+    outlier_rate, number_outliers, outlier_mask = detect_outliers_intrinsic(
+        data_series, options, approximation_curve, z_score)
+
+    return outlier_rate, number_outliers, approximation_curve, outlier_mask
+
+
+def detect_outliers_intrinsic(data_series: pd.Series, options: AccuracyCalculationOptions, approximation_curve: pd.Series, z_score: pd.Series) -> Tuple[float, int, pd.Series]:
     number_outliers, outlier_rate, outlier_mask = get_outlier_stats(
         z_score, options)
 
     if options.plot_outliers:
         plot_outliers(data_series, approximation_curve, outlier_mask)
-
-    return outlier_rate, number_outliers, approximation_curve, outlier_mask
+    return outlier_rate, number_outliers, outlier_mask
 
 
 def get_outlier_stats(z_score: pd.Series, options: AccuracyCalculationOptions) -> Tuple[int, float, pd.Series]:
@@ -51,7 +56,7 @@ if __name__ == '__main__':
 
         options = AccuracyCalculationOptions()
 
-        outlier_rate, num_outliers, approximation, outlier_mask = detect_outliers_intrinsic(
+        outlier_rate, num_outliers, approximation, outlier_mask = detect_outliers_intrinsic_separately(
             data_series, options)
 
         print(
