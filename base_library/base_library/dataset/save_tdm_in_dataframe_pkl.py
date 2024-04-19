@@ -3,7 +3,7 @@ import pandas as pd
 from tqdm import tqdm
 import tdm_loader
 
-from accuracy_calculations.misc.path_helper import get_project_root
+from base_library.misc.path_helper import get_project_root
 
 
 if __name__ == '__main__':
@@ -23,7 +23,7 @@ if __name__ == '__main__':
         for i in tqdm(range(number_rows_in_data)):
             # Daten auslesen
             try:
-                array_values = data_file.channel(i, observation_feature)
+                array_values = data_file.channel(i, "Zeit")
             except IndexError:
                 continue
 
@@ -36,6 +36,6 @@ if __name__ == '__main__':
 
         # Verbinden aller DataFrames in der Liste zu einem einzigen DataFrame
         df_of_observated_feature = pd.concat(dfs, axis=0)
-        df_of_observated_feature.to_pickle(filepath_saving, compression='gzip')
+        # df_of_observated_feature.to_pickle(filepath_saving, compression='gzip')
 
         print(df_of_observated_feature)
