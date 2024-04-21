@@ -84,7 +84,7 @@ def clean_nan_columns(df: pd.DataFrame) -> None:
     df.drop(columns=columns_with_only_nan, inplace=True)
 
 
-def slice_dataframe(df1: pd.DataFrame, df2: pd.DataFrame, df3: pd.DataFrame, time_series: pd.Series, mean_difference: float) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def slice_dataframe(df1: pd.DataFrame, df2: pd.DataFrame, df3: pd.DataFrame, time_series: pd.Series, mean_difference: float) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, int, int]:
     lower_bound = time_series.iloc[0] - mean_difference * 0.1
     upper_bound = time_series.iloc[-1] + mean_difference * 0.1
     if upper_bound <= lower_bound:
@@ -96,12 +96,13 @@ def slice_dataframe(df1: pd.DataFrame, df2: pd.DataFrame, df3: pd.DataFrame, tim
     if not lower_bound_test or not upper_bound_test:
         warnings.warn(
             "Hier gibt es offenbar keine Vergleichsdaten.", UserWarning)
-        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+        return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), 0, len(time_series)
 
     # Index des letzten auftretens von der unteren Grenze oder größer
     lower_bound_indices = (df1 >= lower_bound).idxmax(axis=1)
     # NaNs filtern
     lb_indiced_filtered = lower_bound_indices[(df1 >= lower_bound).any(axis=1)]
+    lb_index_min = lb_indiced_filtered.min()
 
     # Index des ersten Auftretens von der oberen Grenze in jeder Zeile finden
     upper_bound_indices = (df1 >= upper_bound).idxmax(axis=1)
@@ -109,15 +110,15 @@ def slice_dataframe(df1: pd.DataFrame, df2: pd.DataFrame, df3: pd.DataFrame, tim
 
     # Index des ersten Auftretens von der oberen Grenze in jeder Zeile finden
     # Falls alle Werte in Nullen sind, wird die obere Grenze nicht erreicht und die maximale Spaltenzahl muss beachtet werden
-    ub_indices_max = ub_indiced_filtered.max() if len(
+    ub_index_max = ub_indiced_filtered.max() if len(
         ub_indiced_filtered) > 0 else len(df1.columns)
 
     # DataFrame slicen, sodass nur die zeitlichen interessanten WErte weiterhin betrachtet werden
-    result_df1 = df1.loc[:, lb_indiced_filtered.min():ub_indices_max]
-    result_df2 = df2.loc[:, lb_indiced_filtered.min():ub_indices_max]
-    result_df3 = df3.loc[:, lb_indiced_filtered.min():ub_indices_max]
+    result_df1 = df1.loc[:, lb_index_min:ub_index_max]
+    result_df2 = df2.loc[:, lb_index_min:ub_index_max]
+    result_df3 = df3.loc[:, lb_index_min:ub_index_max]
 
-    return result_df1, result_df2, result_df3
+    return result_df1, result_df2, result_df3, lb_index_min, ub_index_max
 
 
 def delete_rows_with_different_frequency(df: pd.DataFrame, mean_diff: float) -> pd.DataFrame:
@@ -130,7 +131,7 @@ def delete_rows_with_different_frequency(df: pd.DataFrame, mean_diff: float) -> 
     return df_filtered
 
 
-def create_comparison_data_for_all_windows(time_channel_group: pd.Series, step_channel_group: pd.Series, mean_diff: float, time_df_synchronized: pd.DataFrame, step_df_synchronized: pd.DataFrame, n_df_synchronized: pd.DataFrame, options: ComparisonDataExtractionOptions):
+def create_comparison_data_for_all_windows(time_channel_group: pd.Series, step_channel_group: pd.Series, mean_diff: float, time_df: pd.DataFrame, step_df: pd.DataFrame, oberserved_feature_df: pd.DataFrame, lb_index: int, ub_index: int, options: ComparisonDataExtractionOptions):
 
     df_list = []
     window_size = options.window_size
@@ -143,15 +144,20 @@ def create_comparison_data_for_all_windows(time_channel_group: pd.Series, step_c
                                          i: window_size * (i + 1)]
 
         # Für jedes Fenster werden die Dataframes zur schnelleren Verarbeitung weiter unterteilt
-        time_df, step_df, n_df = slice_dataframe(
-            time_df_synchronized, step_df_synchronized, n_df_synchronized, time_series, mean_diff)
+        # Um bei sehr sehr großen Dataframes unnötige Indexsuche zu vermeiden,
+        # wird auf diese Weise ein großzügiger Bereich vorgegeben, indem die entsprechend gesuchten Werte liegen werden.
+        ub_logical = min(ub_index + 6 * (ub_index - lb_index),
+                         time_df.shape[1])
+        time_df_relevant, step_df_relevant, observed_feature_df_relevant, lb_index, ub_index = slice_dataframe(
+            time_df.loc[:, lb_index:ub_logical], step_df.loc[:, lb_index:ub_logical], oberserved_feature_df.loc[:, lb_index:ub_logical], time_series, mean_diff)
+
         filtered_df = create_comparison_data_for_one_window(
-            time_series, time_df, n_df, step_series, step_df, mean_diff)
+            time_series, time_df_relevant, observed_feature_df_relevant, step_series, step_df_relevant, mean_diff)
         df_list.append(filtered_df)
 
     # Zusammenfügen der Vergleichsdaten aller Fenster
-    comparison = pd.concat(df_list, axis=1)
-    return comparison
+    comparison_data = pd.concat(df_list, axis=1)
+    return comparison_data
 
 
 def extract_data_and_comparison_data(channel_group: int, observation_feature: str, options: ComparisonDataExtractionOptions, ) -> Tuple[pd.Series, pd.DataFrame]:
@@ -187,15 +193,15 @@ def extract_data_and_comparison_data(channel_group: int, observation_feature: st
             time_frame, mean_diff)
 
     # Löschen von Zeilen in den Vergleichsdaten, bei denen nicht alle Informationen zur Verfügung stehen.
-    time_df_synchronized, step_df_synchronized, n_df_synchronized = synchronize_indices(
+    time_df_synchronized, step_df_synchronized, observed_feature_df_synchronized = synchronize_indices(
         time_frame, step_frame, observed_feature_frame)
 
     # Dataframes einmalig reduzieren, bezüglich der Zeitgrenzen
-    time_df, step_df, n_df = slice_dataframe(
-        time_df_synchronized, step_df_synchronized, n_df_synchronized, time_channel_group, mean_diff)
+    time_df, step_df, observed_feature_df, lb_index, ub_index = slice_dataframe(
+        time_df_synchronized, step_df_synchronized, observed_feature_df_synchronized, time_channel_group, mean_diff)
 
     comparison_data = create_comparison_data_for_all_windows(
-        time_channel_group, step_channel_group, mean_diff, time_df, step_df, n_df, options)
+        time_channel_group, step_channel_group, mean_diff, time_df, step_df, observed_feature_df, lb_index, ub_index, options)
 
     return observed_data_channel_group, comparison_data
 
@@ -224,11 +230,11 @@ def extract_relevant_data(channel_group: int, observation_feature: str) -> pd.Se
 
 if __name__ == '__main__':
 
-    channel_group = 200
-    observation_feature = "Antrieb 1  Drehzahl"
+    channel_group_data = 200
+    feature = "Antrieb 1  Drehzahl"
     comparison_options = ComparisonDataExtractionOptions()
 
     # Extrahieren der Reihe, die betrachtet werden soll
-    observed_data_channel_group, comparison_data = extract_data_and_comparison_data(
-        channel_group, observation_feature, comparison_options)
-    print(comparison_data)
+    channel_group_data_observed_feature, comparison = extract_data_and_comparison_data(
+        channel_group_data, feature, comparison_options)
+    print(comparison)
