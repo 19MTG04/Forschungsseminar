@@ -95,7 +95,7 @@ def slice_dataframe(df1: pd.DataFrame, df2: pd.DataFrame, df3: pd.DataFrame, tim
     upper_bound_test = (df1 < upper_bound).any(axis=None)
     if not lower_bound_test or not upper_bound_test:
         warnings.warn(
-            "Hier gibt es offenbar keine Vergleichsdaten.", UserWarning)
+            f"Spätestens ab Schritt {time_series.index[0]} {time_series.iloc[0]} Sekunden nach Beginn der Datenaufnahme gibt es offenbar keine Vergleichsdaten mehr für diese Zeitreihe.", UserWarning)
         return pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), 0, len(time_series)
 
     # Index des letzten auftretens von der unteren Grenze oder größer
