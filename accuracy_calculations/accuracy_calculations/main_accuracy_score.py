@@ -1,16 +1,13 @@
 import pandas as pd
 import numpy as np
-import tdm_loader
-from pathlib import Path
 
 from accuracy_calculations.missing_data import detect_missing_data
 from accuracy_calculations.outliers_no_comp import detect_outliers_intrinsic
 from accuracy_calculations.dispersion_no_comp import get_dispersion_stats
 from accuracy_calculations.statistical_analysis_helper import general_dispersion_analysis
 from accuracy_calculations.accuracy_calculation_options import AccuracyCalculationOptions
-from accuracy_calculations.misc.path_helper import get_project_root
 
-from base_library.extract_data_and_comparison_data import extract_relevant_data, extract_data_and_comparison_data
+from base_library.extract_data_and_comparison_data import extract_data_and_comparison_data
 from base_library.data_extraction_options import ComparisonDataExtractionOptions
 
 # TODO: Ich nutze nicht die Berechnung der Standardabweichung für eine Stichprobe bisher. Sollte ich? (ddof=0 im Moment, bei Testdaten besser)
