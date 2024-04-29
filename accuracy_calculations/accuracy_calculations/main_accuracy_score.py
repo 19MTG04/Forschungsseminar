@@ -10,7 +10,7 @@ from accuracy_calculations.accuracy_calculation_options import AccuracyCalculati
 from base_library.extract_data_and_comparison_data import extract_data_and_comparison_data
 from base_library.data_extraction_options import ComparisonDataExtractionOptions
 
-# TODO: Ich nutze nicht die Berechnung der Standardabweichung für eine Stichprobe bisher. Sollte ich? (ddof=0 im Moment, bei Testdaten besser)
+# TODO: Ich nutze die Berechnung der Standardabweichung für eine Stichprobe (ddof=1).
 # TODO: Im Bericht steht als Konfidenzintervall 95%. Eher 99% nutzen wie hier im Code oder?
 # TODO: 2.1.5 ist im Bericht tendenziell falsch mit den Formeln. Pi/2 und besser beschreiben wie es im Code ist.
 # TODO: Gesamte Berechnung für intrinsische Genauigkeitsberechnung ist im Bericht noch nicht beschrieben. Im Code sollte alles passen.
@@ -68,7 +68,7 @@ if __name__ == '__main__':
 
     channel_group = 214
     observation_feature = "Antrieb 1  Drehzahl"
-    accuracy_options = AccuracyCalculationOptions(plot_outliers=True)
+    accuracy_options = AccuracyCalculationOptions(plot_intrinsic_outliers=True)
     comparison_data_options = ComparisonDataExtractionOptions()
 
     data_series, comparison_data = extract_data_and_comparison_data(

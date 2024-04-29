@@ -28,7 +28,7 @@ class AccuracyCalculationOptions:
                                                  Literal['regression_deg_3']] = 'mean'
     threshold_outliers: float = 2.58
 
-    plot_outliers: bool = False
+    plot_intrinsic_outliers: bool = False
 
     weights: AccuracySubcategoryWeights = field(
         default_factory=AccuracySubcategoryWeights)
