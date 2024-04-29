@@ -1,48 +1,41 @@
-from typing import Tuple
 import numpy as np
-import pandas as pd
-
 
 from accuracy_calculations.accuracy_calculation_options import AccuracyCalculationOptions
-from accuracy_calculations.statistical_analysis_helper import optimize_window_length, analyse_dispersion
 
-# TODO: Umschreiben, dass es für den vergleich mehrerer Zeitreihen gilt.
+from base_library.extract_data_and_comparison_data import extract_data_and_comparison_data
+from base_library.data_extraction_options import ComparisonDataExtractionOptions
 
-
-def analyse_dispersion_intrinsic(data_series: pd.Series, options: AccuracyCalculationOptions) -> Tuple[float, pd.Series]:
-    window_length = optimize_window_length(data_series)
-    approximation_curve, z_score = analyse_dispersion(
-        data_series, window_length=window_length, options=options)
-
-    dispersion_score = get_dispersion_stats(
-        z_score, options)
-
-    return dispersion_score, approximation_curve
+# TODO Diese Funktion aufgliedern und schön machen!
+# TODO: Spezifischere Optionen einführen.
 
 
-def get_dispersion_stats(z_score: pd.Series, options: AccuracyCalculationOptions) -> float:
-    z_score_normalized = abs(z_score) / options.threshold_outliers
-    z_score_clipped = z_score_normalized.clip(0, 1)
+def calculate_dispersion_of_comparion_data_score(data_series, comparison_data):
+    comparison_data_std = comparison_data.std(axis=0).astype(float)
+    comparison_data_mean = comparison_data.mean(axis=0).astype(float)
+    data_points_per_timestep = comparison_data.notna().sum(axis=0)
+    weights_for_each_timestep = 2 - \
+        (2 - 0.25) * np.exp(-0.05 * (data_points_per_timestep-4))
+    weights_for_each_timestep = weights_for_each_timestep.mask(
+        weights_for_each_timestep < 0.25, 0)
 
-    dispersion_score = sum(np.cos(np.pi / 2 * z_score_clipped)
-                           ) / len(z_score_clipped.dropna())
+    z_score = ((data_series.values - comparison_data_mean) /
+               comparison_data_std).fillna(0).abs()
+    z_score_clipped = np.clip(z_score, 0, 2.58)
 
-    return dispersion_score
+    dispersion_score_comparison = (1 - (z_score_clipped * weights_for_each_timestep).sum() /
+                                   weights_for_each_timestep.sum())
+    number_outliers_comparison = ((z_score > 2.58) & (
+        data_points_per_timestep >= 4)).sum()
+    outlier_score_comparison = 1 - \
+        100 * number_outliers_comparison / len(data_series)
+    return dispersion_score_comparison, outlier_score_comparison, number_outliers_comparison
 
 
 if __name__ == '__main__':
-    def main():
-        N = 1000
-        np.random.seed(1)
-        df = pd.DataFrame(
-            {'test_data': np.sin(np.linspace(0, 10, num=N)) + np.random.normal(scale=0.6, size=N)})
-        data_series = df['test_data']
+    channel_group = 214
+    observation_feature = "Antrieb 1  Drehzahl"
+    comparison_data_options = ComparisonDataExtractionOptions()
 
-        options = AccuracyCalculationOptions()
-
-        dispersion_score, _ = analyse_dispersion_intrinsic(
-            data_series, options)
-
-        print(f'Streuungs-Score: {dispersion_score:.2f}')
-
-    main()
+    data_series, comparison_data = extract_data_and_comparison_data(
+        channel_group, observation_feature, comparison_data_options)
+    calculate_dispersion_of_comparion_data_score(data_series, comparison_data)
