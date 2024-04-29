@@ -21,7 +21,7 @@ def detect_outliers_intrinsic(data_series: pd.Series, options: AccuracyCalculati
     number_outliers, outlier_rate, outlier_mask = get_outlier_stats(
         z_score, options)
 
-    if options.plot_outliers:
+    if options.plot_intrinsic_outliers:
         plot_outliers(data_series, approximation_curve, outlier_mask)
     return outlier_rate, number_outliers, outlier_mask
 
