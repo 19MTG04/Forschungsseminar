@@ -161,6 +161,25 @@ def create_comparison_data_for_all_windows(time_channel_group: pd.Series, step_c
 
 
 def extract_data_and_comparison_data(channel_group: int, observation_feature: str, options: ComparisonDataExtractionOptions, ) -> Tuple[pd.Series, pd.DataFrame]:
+    """
+    Dies ist die Funktion, in der die relevante Datenserie extrahiert wird und die Vergleichsdaten zu den entsprechenden Zeitpunkten der Serie extrahiert werden.
+    Vergleichsdaten sind dabei Daten, die:
+    - zu einem ähnlichen Zeitpunkt aufgenommen wurden, wie die Daten der relevanten Datenserie (+- 10 % des durchschnittlichen Zeitschrittes)
+    - den selben Prüfschritt zu diesem Zeitschritt hatten, wie die Daten der relevanten Datenserie
+    - je nach gewählten Einstellungen zählen nur die Zeitreihen, die in halber, ähnlicher oder doppelter Frequenz Daten erfasst haben
+
+    Der Aufbau der Vergleichsdaten ist dabei, dass die Spalten die Zeitpunkte der relevanten Serie nach Start der Datenerfassung sind.
+    Der Name der Spalten ist der Name der relevanten Zeitreihe.
+    Die Zeilen sind nach den Zeitreihen benannt, aus denen die Vergleichsdaten generiert werden.
+
+    Args:
+        channel_group (int): Die Nummer der betrachteten, relevanten Zeitreihe
+        observation_feature (str): Das zu betrachtende Feature der Zeitreihe, bspw. die Drehzahl des Antriebs 1
+        options (ComparisonDataExtractionOptions): Extra Optionen zur Art der Datenextraktion
+
+    Returns:
+        Tuple[pd.Series, pd.DataFrame]: Relevante Vergleichsdatenreihe und Dateframe der Vergleichsdaten
+    """
     # Dataframes laden
     time_frame_saved, step_frame_saved, observed_feature_frame_saved = load_dataframe_data(
         observation_feature)
@@ -230,7 +249,7 @@ def extract_relevant_data(channel_group: int, observation_feature: str) -> pd.Se
 
 if __name__ == '__main__':
 
-    channel_group_data = 200
+    channel_group_data = 214
     feature = "Antrieb 1  Drehzahl"
     comparison_options = ComparisonDataExtractionOptions()
 
