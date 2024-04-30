@@ -5,6 +5,7 @@ from accuracy_calculations.missing_data import detect_missing_data
 from accuracy_calculations.outliers_no_comp import detect_outliers_intrinsic
 from accuracy_calculations.dispersion_no_comp import get_dispersion_stats
 from accuracy_calculations.statistical_analysis_helper import general_dispersion_analysis
+from accuracy_calculations.comparison_data_score_analysis import get_dispersion_and_outlier_score_for_comparison_data
 from accuracy_calculations.accuracy_calculation_options import AccuracyCalculationOptions
 
 from base_library.extract_data_and_comparison_data import extract_data_and_comparison_data
@@ -29,15 +30,21 @@ def calculate_accuracy_score(data_series: pd.Series, accuracy_options: AccuracyC
     window_length, approximation_curve, z_score = general_dispersion_analysis(
         data_series, accuracy_options)
 
-    rate_missing_data, _ = detect_missing_data(data_series)
-    rate_outliers_intrinsic, _, _ = detect_outliers_intrinsic(
+    missing_data_score, _, _ = detect_missing_data(
+        data_series, accuracy_options)
+    outlier_score, _, _, _ = detect_outliers_intrinsic(
         data_series, accuracy_options, approximation_curve, z_score)
     dispersion_score = get_dispersion_stats(
         data_series, approximation_curve, z_score, accuracy_options, window_length)
 
-    accuracy_score = ((1 - rate_missing_data * accuracy_options.weights.missing_data) +
-                      (1 - rate_outliers_intrinsic * accuracy_options.weights.outliers_intrinsic) +
-                      (dispersion_score * accuracy_options.weights.dispersion_intrinsic)) / (accuracy_options.weights.sum_weights())
+    dispersion_score_comparison, outlier_score_comparison, _ = get_dispersion_and_outlier_score_for_comparison_data(
+        data_series, comparison_data, accuracy_options)
+
+    accuracy_score = ((missing_data_score * accuracy_options.weights.missing_data) +
+                      (outlier_score * accuracy_options.weights.outliers_intrinsic) +
+                      (dispersion_score * accuracy_options.weights.dispersion_intrinsic) +
+                      (outlier_score_comparison * accuracy_options.weights.outliers_comparison) +
+                      (dispersion_score_comparison * accuracy_options.weights.dispersion_comparison)) / (accuracy_options.weights.sum_weights())
 
     return accuracy_score
 
@@ -68,7 +75,8 @@ if __name__ == '__main__':
 
     channel_group = 214
     observation_feature = "Antrieb 1  Drehzahl"
-    accuracy_options = AccuracyCalculationOptions(plot_intrinsic_outliers=True)
+    accuracy_options = AccuracyCalculationOptions(
+        plot_intrinsic_outliers=True, plot_comparison_data=True)
     comparison_data_options = ComparisonDataExtractionOptions()
 
     data_series, comparison_data = extract_data_and_comparison_data(

@@ -29,6 +29,12 @@ class AccuracyCalculationOptions:
     threshold_outliers: float = 2.58
 
     plot_intrinsic_outliers: bool = False
+    plot_comparison_data: bool = False
+
+    multiplicator_outliers: float = 100
+    multiplicator_missing_data: float = 100
+
+    minimum_number_of_comparison_data = 4
 
     weights: AccuracySubcategoryWeights = field(
         default_factory=AccuracySubcategoryWeights)
