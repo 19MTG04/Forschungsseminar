@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 import tdm_loader
+from datetime import datetime
 
 from base_library.misc.path_helper import get_project_root
 
@@ -39,3 +40,21 @@ if __name__ == '__main__':
         # df_of_observated_feature.to_pickle(filepath_saving, compression='gzip')
 
         print(df_of_observated_feature)
+
+    # Zeitpunkt der Datenerfassung für jede Zeitreihe erfassen
+    number_time_series = []
+    begin_data_collection = []
+    for i in range(data_file.no_channel_groups()):
+        number_time_series.append(f"Zeitreihe {i}")
+        begin_data_collection.append(datetime.strptime(
+            str(data_file.channel_group_name(i)), '%Y_%m_%d_%H_%M_%S'))
+
+    # Serie aus der Nummer der Zeitreihe (Index) und dem Startzeitpunkt der Datenerfassung erstellen
+    timestep_data_collection_per_time_series = pd.Series(
+        begin_data_collection, index=number_time_series)
+    filepath_saving_timestamps = get_project_root() / 'dataset' / \
+        'Beginn der Datenerfassung je Zeitreihe.pkl'
+
+    # timestep_data_collection_per_time_series.to_pickle(
+    #     filepath_saving_timestamps, compression='gzip')
+    print(timestep_data_collection_per_time_series)
