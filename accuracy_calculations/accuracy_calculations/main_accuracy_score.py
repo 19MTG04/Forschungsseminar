@@ -77,6 +77,8 @@ if __name__ == '__main__':
     observation_feature = "Antrieb 1  Drehzahl"
     accuracy_options = AccuracyCalculationOptions(
         plot_intrinsic_outliers=True, plot_comparison_data=True)
+    # comparison_data_options = ComparisonDataExtractionOptions(
+    #     period_limitations=[('02.10.2023 10:18:00', '02.10.2023 10:20:00'), ('06.10.2023 11:16:00', '06.10.2023 11:18:00'), ('07.10.2023 11:16:00', '07.10.2023 19:16:00')])
     comparison_data_options = ComparisonDataExtractionOptions()
 
     data_series, comparison_data = extract_data_and_comparison_data(
