@@ -64,7 +64,8 @@ if __name__ == '__main__':
             {'test_data': np.sin(np.linspace(0, 10, num=N)) + np.random.normal(scale=0.6, size=N)})
         data_series = df['test_data']
 
-        accuracy_options = AccuracyCalculationOptions()
+        accuracy_options = AccuracyCalculationOptions(
+            plot_intrinsic_outliers=True)
 
         accuracy_score = calculate_accuracy_score(
             data_series, accuracy_options)
