@@ -237,16 +237,21 @@ def get_time_series_inside_time_limitations(options: ComparisonDataExtractionOpt
     beginning_timestep_per_series = pd.read_pickle(
         file_loading / 'Beginn der Datenerfassung je Zeitreihe.pkl', compression='gzip')
 
-    period_limitations_datetime = [(datetime.strptime(start, '%d.%m.%Y %H:%M:%S'),
-                                    datetime.strptime(end, '%d.%m.%Y %H:%M:%S'))
-                                   for start, end in options.period_limitations]
+    period_limitations_datetime_same_dataset = [(datetime.strptime(start, '%d.%m.%Y %H:%M:%S'),
+                                                 datetime.strptime(end, '%d.%m.%Y %H:%M:%S'))
+                                                for start, end in options.period_limitations_same_dataset]
+    period_limitations_datetime_additional_dataset = [(datetime.strptime(start, '%d.%m.%Y %H:%M:%S'),
+                                                       datetime.strptime(end, '%d.%m.%Y %H:%M:%S'))
+                                                      for start, end in options.period_limitations_additional_dataset]
+    all_period_limitations = [*period_limitations_datetime_same_dataset,
+                              *period_limitations_datetime_additional_dataset]
 
     relevant_time_series_list = []
 
     # Iteriere über die Zeitintervalle und überprüfe, welche Zeitreihe im Intervall liegt. Ohne Angabe werden alle Daten verwendet.
-    if len(period_limitations_datetime) > 0:
+    if len(all_period_limitations) > 0:
         # Testen, ob die relevante Zeitreihe selbst innerhalb des vorgegebenen Zeitbereiches liegt.
-        for start, end in period_limitations_datetime:
+        for start, end in all_period_limitations:
             if end < start:
                 raise ValueError(
                     f"Die untere Zeitgrenze {start} ist später als die Obere {end}")
@@ -264,7 +269,7 @@ def get_time_series_inside_time_limitations(options: ComparisonDataExtractionOpt
     relevant_series_name = f'Zeitreihe {channel_group}'
     if relevant_series_name not in relevant_time_series.index:
         warnings.warn(
-            f"Die angegebene Zeitreihe {channel_group} liegt selbst nicht im Bereich für die Vergleichsdaten.", UserWarning)
+            f"Die angegebene Zeitreihe {channel_group} ({beginning_timestep_per_series.loc[relevant_series_name]}) liegt selbst nicht im Bereich für die Vergleichsdaten.", UserWarning)
 
     return relevant_time_series
 

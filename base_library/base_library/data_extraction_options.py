@@ -14,4 +14,6 @@ class ComparisonDataExtractionOptions:
     # Durch Angabe von [('30.09.2023 12:00:00', '02.10.2023 12:00:00'), ('04.10.2023 12:00:00', '06.10.2023 12:00:00')]
     # werden nur Zeitreihen, die zwischen diesen Daten aufgenommen wurden, als Vergleichsdaten gewertet.
     # Die Anzahl der Angaben ist unbegrenzt.
-    period_limitations: List[Tuple] = field(default_factory=list)
+    period_limitations_same_dataset: List[Tuple] = field(default_factory=list)
+    period_limitations_additional_dataset: List[Tuple] = field(
+        default_factory=list)
