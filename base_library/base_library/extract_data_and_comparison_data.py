@@ -197,7 +197,7 @@ def extract_data_and_comparison_data(channel_group: int, observation_feature: st
     # Löschen von Spalten im Zeit-Dataframe ohne Daten zur nachträglich schnelleren Berechnung
     clean_nan_columns(time_frame)
 
-    series_inside_time_limits = get_time_series_inside_time_limitations(
+    series_inside_time_limits, beginning_relevant_time_series = get_time_series_inside_time_limitations(
         options, channel_group)
 
     # Daten der extrahierten Serien müssen gleich lang sein!
@@ -219,7 +219,7 @@ def extract_data_and_comparison_data(channel_group: int, observation_feature: st
             time_frame, mean_diff)
 
     # Löschen von Zeilen in den Vergleichsdaten, bei denen nicht alle Informationen zur Verfügung stehen oder die nicht in der angegebenen Zeitspanne sind.
-    time_df_synchronized, step_df_synchronized, observed_feature_df_synchronized, _ = synchronize_indices(
+    time_df_synchronized, step_df_synchronized, observed_feature_df_synchronized, series_inside_time_limits_synchronized = synchronize_indices(
         time_frame, step_frame, observed_feature_frame, pd.DataFrame(series_inside_time_limits))
 
     # Dataframes einmalig reduzieren, bezüglich der Zeitgrenzen
@@ -229,10 +229,17 @@ def extract_data_and_comparison_data(channel_group: int, observation_feature: st
     comparison_data = create_comparison_data_for_all_windows(
         time_channel_group, step_channel_group, mean_diff, time_df, step_df, observed_feature_df, lb_index, ub_index, options)
 
+    # Erweitern der Vergleichsdaten im Index um den Zeitstempel des Datenerfassungsbeginn
+    idx = pd.MultiIndex.from_arrays([comparison_data.index, series_inside_time_limits_synchronized.iloc[:, 0]], names=[
+                                    f'Vergleichszeitreihe {channel_group}', beginning_relevant_time_series])
+    comparison_data = comparison_data.set_index(idx)
+    comparison_data.columns.set_names(
+        "Zeitpunkte Datenerfassung von:", inplace=True)
+
     return observed_data_channel_group, comparison_data
 
 
-def get_time_series_inside_time_limitations(options: ComparisonDataExtractionOptions, channel_group: int) -> pd.Series:
+def get_time_series_inside_time_limitations(options: ComparisonDataExtractionOptions, channel_group: int) -> Tuple[pd.Series, pd.Timestamp]:
     file_loading = get_project_root() / 'dataset'
     beginning_timestep_per_series = pd.read_pickle(
         file_loading / 'Beginn der Datenerfassung je Zeitreihe.pkl', compression='gzip')
@@ -246,7 +253,7 @@ def get_time_series_inside_time_limitations(options: ComparisonDataExtractionOpt
     all_period_limitations = [*period_limitations_datetime_same_dataset,
                               *period_limitations_datetime_additional_dataset]
 
-    relevant_time_series_list = []
+    comparison_time_series_list = []
 
     # Iteriere über die Zeitintervalle und überprüfe, welche Zeitreihe im Intervall liegt. Ohne Angabe werden alle Daten verwendet.
     if len(all_period_limitations) > 0:
@@ -258,20 +265,21 @@ def get_time_series_inside_time_limitations(options: ComparisonDataExtractionOpt
             elif end == start:
                 raise ValueError(
                     f"Die untere Zeitgrenze {start} ist gleich der Oberen {end}")
-            relevant_time_series_list.extend(beginning_timestep_per_series[(
+            comparison_time_series_list.extend(beginning_timestep_per_series[(
                 beginning_timestep_per_series >= start) & (beginning_timestep_per_series <= end)].index)
         # Erstellen einer neuen Serie, die nur die ausgewählten Zeitreihen enthält
-        relevant_time_series = beginning_timestep_per_series.loc[relevant_time_series_list]
+        comparsion_time_series = beginning_timestep_per_series.loc[comparison_time_series_list]
 
     else:
-        relevant_time_series = beginning_timestep_per_series
+        comparsion_time_series = beginning_timestep_per_series
 
     relevant_series_name = f'Zeitreihe {channel_group}'
-    if relevant_series_name not in relevant_time_series.index:
+    beginning_relevant_time_series = beginning_timestep_per_series.loc[relevant_series_name]
+    if relevant_series_name not in comparsion_time_series.index:
         warnings.warn(
-            f"Die angegebene Zeitreihe {channel_group} ({beginning_timestep_per_series.loc[relevant_series_name]}) liegt selbst nicht im Bereich für die Vergleichsdaten.", UserWarning)
+            f"Die angegebene Zeitreihe {channel_group} ({beginning_relevant_time_series}) liegt selbst nicht im Bereich für die Vergleichsdaten.", UserWarning)
 
-    return relevant_time_series
+    return comparsion_time_series, beginning_relevant_time_series
 
 
 def load_dataframe_data(observation_feature: str) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
