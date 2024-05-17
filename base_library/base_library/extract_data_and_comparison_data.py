@@ -161,6 +161,37 @@ def create_comparison_data_for_all_windows(time_channel_group: pd.Series, step_c
     return comparison_data
 
 
+def check_for_overlapping_periods(periods1, periods2) -> None:
+    def test_periods_overlap(periods):
+        # Sortiere die Zeitspannen nach Startzeit
+        periods_sorted = sorted(periods, key=lambda x: pd.to_datetime(x[0]))
+
+        # Prüfe auf Überschneidungen
+        for i in range(1, len(periods_sorted)):
+            start_previous, end_previous = pd.to_datetime(
+                periods_sorted[i-1][0]), pd.to_datetime(periods_sorted[i-1][1])
+            start_current, end_current = pd.to_datetime(
+                periods_sorted[i][0]), pd.to_datetime(periods_sorted[i][1])
+            if start_current <= end_previous:
+                return True
+        return False
+
+    # Kombiniere beide Listen und prüfe auf Überschneidungen innerhalb der kombinierten Liste
+    combined_periods = periods1 + periods2
+
+    if test_periods_overlap(periods1):
+        raise ValueError(
+            f"Überlappende Zeiträume in {periods1=} gefunden.")
+
+    if test_periods_overlap(periods2):
+        raise ValueError(
+            f"Überlappende Zeiträume in {periods2=} gefunden.")
+
+    if test_periods_overlap(combined_periods):
+        raise ValueError(
+            f"Überlappende Zeiträume in {combined_periods=} gefunden.")
+
+
 def extract_data_and_comparison_data(channel_group: int, observation_feature: str, options: ComparisonDataExtractionOptions, ) -> Tuple[pd.Series, pd.DataFrame]:
     """
     Dies ist die Funktion, in der die relevante Datenserie extrahiert wird und die Vergleichsdaten zu den entsprechenden Zeitpunkten der Serie extrahiert werden.
@@ -183,6 +214,9 @@ def extract_data_and_comparison_data(channel_group: int, observation_feature: st
         Tuple[pd.Series, pd.DataFrame]: Relevante Vergleichsdatenreihe und Dateframe der Vergleichsdaten
     """
     print("Vorbereitung zur Extraktion der Vergleichsdaten beginnt...")
+
+    check_for_overlapping_periods(
+        options.period_limitations_same_dataset, options.period_limitations_additional_dataset)
 
     # Dataframes laden
     time_frame_saved, step_frame_saved, observed_feature_frame_saved = load_dataframe_data(
@@ -234,7 +268,7 @@ def extract_data_and_comparison_data(channel_group: int, observation_feature: st
                                     f'Vergleichszeitreihe {channel_group}', beginning_relevant_time_series])
     comparison_data = comparison_data.set_index(idx)
     comparison_data.columns.set_names(
-        "Zeitpunkte Datenerfassung von:", inplace=True)
+        f"Zeitpunkte Datenerfassung ZR {channel_group}:", inplace=True)
 
     return observed_data_channel_group, comparison_data
 
