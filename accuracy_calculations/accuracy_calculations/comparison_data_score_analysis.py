@@ -28,8 +28,8 @@ def get_outlier_stats_for_comparison(data_series: pd.Series, options: AccuracyCa
         data_points_per_timestep >= options.minimum_number_of_comparison_data)).sum()
 
     # Der Score muss zwischen 0 und 1 liegen.
-    outlier_score_comparison = np.clip(1 - options.multiplicator_outliers *
-                                       number_outliers_comparison / len(data_series), 0, 1)
+    outlier_score_comparison = np.clip(
+        1 - options.multiplicator_outliers * number_outliers_comparison / len(data_series), 0, 1)
 
     return number_outliers_comparison, outlier_score_comparison
 
