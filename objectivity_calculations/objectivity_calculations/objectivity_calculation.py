@@ -25,11 +25,11 @@ def calculate_obejectivity(data_series: pd.Series, comparison_data: pd.DataFrame
             dataset_factor = 1
 
         mean_objectivity_score = calculate_mean_objectivity(
-            same_iterator_df, other_iterator_df)
+            same_iterator_df, other_iterator_df, objectivity_options)
         variance_objectivity_score = calculate_variance_objectivity(
-            same_iterator_df, other_iterator_df)
+            same_iterator_df, other_iterator_df, objectivity_options)
         autocorrelation_objectivity_score = calculate_autocorrelation_objectivity(
-            same_iterator_df, other_iterator_df)
+            same_iterator_df, other_iterator_df, objectivity_options)
 
         objectivity_score = dataset_factor * ((mean_objectivity_score * objectivity_options.weights.mean_objectivity) +
                                               (variance_objectivity_score * objectivity_options.weights.variance_objectivity) +
@@ -44,8 +44,23 @@ if __name__ == '__main__':
     channel_group = 214
     observation_feature = "Antrieb 1  Drehzahl"
 
+    # comparison_data_options = ComparisonDataExtractionOptions(
+    #     period_limitations_same_dataset=[
+    #         ('02.10.2023 10:18:00', '02.10.2023 10:18:01')],
+    #     period_limitations_additional_dataset=[])
+
+    # comparison_data_options = ComparisonDataExtractionOptions(
+    #     period_limitations_same_dataset=[
+    #         ('02.10.2023 10:18:00', '02.10.2023 10:18:01')],
+    #     period_limitations_additional_dataset=[('07.10.2023 11:16:00', '07.10.2023 19:16:00'), ('08.10.2023 11:16:00', '09.10.2023 19:16:00')])
+
     comparison_data_options = ComparisonDataExtractionOptions(
-        period_limitations_same_dataset=[('02.10.2023 10:18:00', '02.10.2023 10:20:00'), ('05.10.2023 11:16:00', '06.10.2023 11:18:00')], period_limitations_additional_dataset=[('07.10.2023 11:16:00', '07.10.2023 19:16:00'), ('08.10.2023 11:16:00', '09.10.2023 19:16:00')])
+        period_limitations_same_dataset=[('02.10.2023 10:18:00', '02.10.2023 10:20:00'), ('05.10.2023 11:16:00', '06.10.2023 11:18:00')], period_limitations_additional_dataset=[])
+
+    # comparison_data_options = ComparisonDataExtractionOptions(
+    #     period_limitations_same_dataset=[('02.10.2023 10:18:00', '02.10.2023 10:20:00'), ('05.10.2023 11:16:00', '06.10.2023 11:18:00')], period_limitations_additional_dataset=[('07.10.2023 11:16:00', '07.10.2023 19:16:00'), ('08.10.2023 11:16:00', '09.10.2023 19:16:00')])
+
+    # comparison_data_options = ComparisonDataExtractionOptions()
 
     data_series, comparison_data = extract_data_and_comparison_data(
         channel_group, observation_feature, comparison_data_options)
