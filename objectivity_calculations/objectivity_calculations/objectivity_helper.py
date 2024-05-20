@@ -117,18 +117,3 @@ def add_relevant_dataseries_to_iterator(data_series: pd.Series, comparison_data:
         'Zeitreihenname', 'Erfassungsbeginn']
 
     return same_iterator_df, other_iterator_df, one_dataset_only
-
-
-def calculate_mean_obejectivity(same_iterator_df: pd.DataFrame, other_iterator_df: pd.DataFrame) -> float:
-
-    return 5
-
-
-def calculate_variance_obejectivity(same_iterator_df: pd.DataFrame, other_iterator_df: pd.DataFrame) -> float:
-
-    return 5
-
-
-def calculate_autocorrelation_obejectivity(same_iterator_df: pd.DataFrame, other_iterator_df: pd.DataFrame) -> float:
-
-    return 5

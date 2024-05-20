@@ -1,6 +1,9 @@
 import pandas as pd
 
-from objectivity_calculations.objectivity_helper import extract_dataframes_for_objectivity_calculations, calculate_mean_obejectivity, calculate_variance_obejectivity, calculate_autocorrelation_obejectivity
+from objectivity_calculations.objectivity_helper import extract_dataframes_for_objectivity_calculations
+from objectivity_calculations.mean_objectivity import calculate_mean_objectivity
+from objectivity_calculations.variance_objectivity import calculate_variance_objectivity
+from objectivity_calculations.autocorrelation_objectivity import calculate_autocorrelation_objectivity
 from objectivity_calculations.objectivity_options import ObjectivityCalculationOptions, create_objectivity_calculation_options
 
 from base_library.extract_data_and_comparison_data import extract_data_and_comparison_data
@@ -21,11 +24,11 @@ def calculate_obejectivity(data_series: pd.Series, comparison_data: pd.DataFrame
         else:
             dataset_factor = 1
 
-        mean_objectivity_score = calculate_mean_obejectivity(
+        mean_objectivity_score = calculate_mean_objectivity(
             same_iterator_df, other_iterator_df)
-        variance_objectivity_score = calculate_variance_obejectivity(
+        variance_objectivity_score = calculate_variance_objectivity(
             same_iterator_df, other_iterator_df)
-        autocorrelation_objectivity_score = calculate_autocorrelation_obejectivity(
+        autocorrelation_objectivity_score = calculate_autocorrelation_objectivity(
             same_iterator_df, other_iterator_df)
 
         objectivity_score = dataset_factor * ((mean_objectivity_score * objectivity_options.weights.mean_objectivity) +
