@@ -17,7 +17,10 @@ class ObjectivitySubcategoryWeights:
 @dataclass
 class ObjectivityCalculationOptions():
     autocorrlation_horizon: float
+
     factor_for_inner_dataset_calculation_only: float = 0.8
+
+    mapping_factor: float = 0.1
 
     weights: ObjectivitySubcategoryWeights = field(
         default_factory=ObjectivitySubcategoryWeights)
