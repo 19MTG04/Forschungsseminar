@@ -36,7 +36,7 @@ def extract_dataframes_for_objectivity_calculations(data_series: pd.Series, comp
     if len(comparison_data_options.period_limitations_same_dataset) == 0:
         if len(comparison_data_options.period_limitations_additional_dataset) > 0:
             raise ValueError("Es wurde keine explizite Zeitspanne für den Datensatz der Vergleichszeitreihe angegeben, damit gehören alle Daten zu diesem. Eine Angabe eines zusätzlichen Datensatzes ist daher nicht gestattet.")
-        mask_other_iterator[:] = True
+        mask_same_iterator_relevant_dataseries[:] = True
 
     # Bei mehreren Datensätzen wird im same_iterator am Ende der gesamte direkte Vergleichsdatensatz enthalten sein und alle restlichen Datensätze im anderen Iterator.
     # Bei nur einem Datensatz wird im same_iterator nur die Vergleichszeitreihe sein und der restliche Datensatzteil im anderen Iterator.
