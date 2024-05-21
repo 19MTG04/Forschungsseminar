@@ -16,15 +16,17 @@ class ObjectivitySubcategoryWeights:
 
 @dataclass
 class ObjectivityCalculationOptions():
-    autocorrlation_horizon: float
+    autocorrlation_horizon: int
 
     factor_for_inner_dataset_calculation_only: float = 0.8
 
     mapping_factor: float = 0.1
+
+    confidence_interval_z_value: float = 2.58  # 99% Konfidenzintervall
 
     weights: ObjectivitySubcategoryWeights = field(
         default_factory=ObjectivitySubcategoryWeights)
 
 
 def create_objectivity_calculation_options(series: pd.Series):
-    return ObjectivityCalculationOptions(autocorrlation_horizon=max(5, len(series) / 10))
+    return ObjectivityCalculationOptions(autocorrlation_horizon=max(5, int(len(series) / 10)))

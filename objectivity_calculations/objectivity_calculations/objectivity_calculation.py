@@ -54,11 +54,11 @@ if __name__ == '__main__':
     #         ('02.10.2023 10:18:00', '02.10.2023 10:18:01')],
     #     period_limitations_additional_dataset=[('07.10.2023 11:16:00', '07.10.2023 19:16:00'), ('08.10.2023 11:16:00', '09.10.2023 19:16:00')])
 
-    comparison_data_options = ComparisonDataExtractionOptions(
-        period_limitations_same_dataset=[('02.10.2023 10:18:00', '02.10.2023 10:20:00'), ('05.10.2023 11:16:00', '06.10.2023 11:18:00')], period_limitations_additional_dataset=[])
-
     # comparison_data_options = ComparisonDataExtractionOptions(
-    #     period_limitations_same_dataset=[('02.10.2023 10:18:00', '02.10.2023 10:20:00'), ('05.10.2023 11:16:00', '06.10.2023 11:18:00')], period_limitations_additional_dataset=[('07.10.2023 11:16:00', '07.10.2023 19:16:00'), ('08.10.2023 11:16:00', '09.10.2023 19:16:00')])
+    #     period_limitations_same_dataset=[('02.10.2023 10:18:00', '02.10.2023 10:20:00'), ('05.10.2023 11:16:00', '06.10.2023 11:18:00')], period_limitations_additional_dataset=[])
+
+    comparison_data_options = ComparisonDataExtractionOptions(
+        period_limitations_same_dataset=[('02.10.2023 10:18:00', '02.10.2023 10:20:00'), ('05.10.2023 11:16:00', '06.10.2023 11:18:00')], period_limitations_additional_dataset=[('07.10.2023 11:16:00', '07.10.2023 19:16:00'), ('08.10.2023 11:16:00', '09.10.2023 19:16:00')])
 
     # comparison_data_options = ComparisonDataExtractionOptions()
 
