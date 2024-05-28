@@ -1,4 +1,5 @@
-from reputation_calculations.reputation_options import ReputationOptions
+from reputation_calculations.reputation_options import ReputationOptions, create_reputation_options
+import numpy as np
 
 
 def calculate_reputation_score(options: ReputationOptions) -> float:
@@ -25,10 +26,7 @@ def calculate_reputation_score(options: ReputationOptions) -> float:
 
 
 if __name__ == '__main__':
-    options = ReputationOptions()
-    # TODO: Hier sollte eine randomisierte Liste erstellt werden, mit einem bestimmten Random-Seed und einer vorgegebenen Länge n.
-    # TODO: Diese randomisierte Liste muss dann den options an der richtigen Stelle zugeordnet werden.
-    options.reputation_rating = [0.1, 0.2, 0.3, 0.4, 0.5]
+    options = create_reputation_options()
 
     score = calculate_reputation_score(options)
     print(score)
