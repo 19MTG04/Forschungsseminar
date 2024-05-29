@@ -2,9 +2,9 @@ from reputation_calculations.reputation_options import ReputationOptions, create
 import numpy as np
 
 
-def calculate_reputation_score(options: ReputationOptions) -> float:
-    x = options.reputation_rating
-    alpha = options.exponential_smoothing_factor
+def calculate_reputation_score(reputation_options: ReputationOptions) -> float:
+    x = reputation_options.reputation_rating
+    alpha = reputation_options.exponential_smoothing_factor
 
     # Initialisierung der Liste für die Ergebnisse
     all_scores = [0.] * len(x)
