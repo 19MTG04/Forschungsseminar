@@ -1,32 +1,19 @@
-from reputation_calculations.reputation_options import ReputationOptions, create_reputation_options
 import numpy as np
 
+from reputation_calculations.reputation_options import create_reputation_options
 
-def calculate_reputation_score(reputation_options: ReputationOptions) -> float:
-    x = reputation_options.reputation_rating
-    alpha = reputation_options.exponential_smoothing_factor
+from base_library.community_score import calculate_community_score
 
-    # Initialisierung der Liste für die Ergebnisse
-    all_scores = [0.] * len(x)
 
-    # Der erste Wert wird mit alpha gewichtet
-    if len(x) > 0:
-        all_scores[0] = alpha * x[0]
-
-        # Rekursive Berechnung für die restlichen Werte
-        for i in range(1, len(x)):
-            all_scores[i] = (1 - alpha) * all_scores[i - 1] + alpha * x[i]
-
-        reputation_score = all_scores[-1]
-
-    else:
-        reputation_score = 0
+def calculate_reputation_score(ratings: np.ndarray, smoothing_factor: float) -> float:
+    reputation_score = calculate_community_score(ratings, smoothing_factor)
 
     return reputation_score
 
 
 if __name__ == '__main__':
-    options = create_reputation_options()
+    reputation_options = create_reputation_options()
 
-    score = calculate_reputation_score(options)
+    score = calculate_reputation_score(
+        reputation_options.reputation_rating, reputation_options.exponential_smoothing_factor)
     print(score)
