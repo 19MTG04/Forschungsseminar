@@ -7,7 +7,7 @@ def calculate_mean_objectivity(same_iterator_df: pd.DataFrame, other_iterator_df
     mean_same_iterator = same_iterator_df.mean(axis=0)
     mean_other_iterator = other_iterator_df.mean(axis=0)
 
-    if len(other_iterator_df) >= 5:
+    if len(other_iterator_df) >= options.minimum_number_of_comparison_data:
         std_other_iterator = other_iterator_df.std()
 
         z_score = mean_same_iterator.sub(

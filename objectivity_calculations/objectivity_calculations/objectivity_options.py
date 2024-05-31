@@ -20,6 +20,8 @@ class ObjectivityCalculationOptions():
 
     factor_for_inner_dataset_calculation_only: float = 0.8
 
+    minimum_number_of_comparison_data: int = 5
+
     mapping_factor: float = 0.1
 
     confidence_interval_z_value: float = 2.58  # 99% Konfidenzintervall

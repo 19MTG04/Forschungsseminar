@@ -5,7 +5,7 @@ from objectivity_calculations.objectivity_options import ObjectivityCalculationO
 
 def calculate_variance_objectivity(same_iterator_df: pd.DataFrame, other_iterator_df: pd.DataFrame, options: ObjectivityCalculationOptions) -> float:
 
-    if len(same_iterator_df) >= 5 and len(other_iterator_df) >= 5:
+    if len(same_iterator_df) >= options.minimum_number_of_comparison_data and len(other_iterator_df) >= options.minimum_number_of_comparison_data:
         std_same_iterator = same_iterator_df.std()
         std_other_iterator = other_iterator_df.std()
 
