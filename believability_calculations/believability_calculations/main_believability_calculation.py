@@ -20,8 +20,12 @@ def calculate_believability_score(accuracy_score: float, data_series: pd.Series,
         source_data_score = 0
         believability_options.weights.source_data = 0
 
-    consistency_score = determine_consistency_score(
-        data_series, comparison_data, believability_options)
+    if len(comparison_data) > 0:
+        consistency_score = determine_consistency_score(
+            data_series, comparison_data, believability_options)
+    else:
+        consistency_score = 0
+
     believability_options.weights.consistency = determine_weight(
         len(comparison_data))
 
