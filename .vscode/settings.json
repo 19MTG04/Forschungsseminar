@@ -1,5 +1,6 @@
 {
     "python.analysis.extraPaths": [
-        "./base_library"
+        "./base_library",
+        "./accuracy_calculations"
     ]
 }
