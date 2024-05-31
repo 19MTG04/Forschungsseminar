@@ -6,8 +6,12 @@ from typing import Tuple, Optional
 @dataclass
 class BelievabilitySubcategoryWeights:
     accuracy: float = 1
+
+    # Diese beiden Werte werden in Abhängigkeit der jeweiligen rating_array Längen aktualisiert.
     rational_rules: float = 1
     source_data: float = 1
+
+    # Dieser Wert wird in Abhängigkeit der verwendeten Vergleichsdaten aktualisiert und bleibt nicht 1.
     consistency: float = 1
 
     def sum_weights(self) -> float:
@@ -24,7 +28,7 @@ class BelievabilityOptions:
     source_data_used: bool = False
     smoothing_factor_source_data: float = 0.1
 
-    possible_min_max_range: Optional[Tuple[float]] = None
+    possible_min_max_range: Optional[Tuple[float, float]] = None
 
     weights: BelievabilitySubcategoryWeights = field(
         default_factory=BelievabilitySubcategoryWeights)
@@ -73,6 +77,11 @@ def create_believability_options(
     options = BelievabilityOptions(
         ratings_array_rational_rules, ratings_array_source_data
     )
+
+    options.weights.rational_rules = determine_weight(
+        len(ratings_array_rational_rules))
+    options.weights.source_data = determine_weight(
+        len(ratings_array_source_data))
     return options
 
 
@@ -87,3 +96,7 @@ def create_random_series(length_series: int, seed: int = 1) -> np.ndarray:
     ratings_array = np.clip(trend + random_values, 0, 1)
 
     return ratings_array
+
+
+def determine_weight(number_comparison_series: int) -> float:
+    return 1 - (1 - 0.25) * np.exp(-0.02 * number_comparison_series)
