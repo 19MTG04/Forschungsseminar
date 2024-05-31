@@ -27,7 +27,12 @@ def create_reputation_options(ratings_array: Optional[np.ndarray] = None, length
             "Es macht keinen Sinn sowohl ratings_array als auch length_series zu belegen. Entweder wird ein Array verarbeitet oder eine Zufallsserie vorgegebener Länge erstellt.")
 
     if ratings_array is not None:
-        pass
+        if ratings_array.max() > 1:
+            raise ValueError(
+                f"Der Bereich der Bewertungen liegt zwischen 0 und 1, aber der Maximalwert des Ratings ist {ratings_array.max()}")
+        if ratings_array.min() < 0:
+            raise ValueError(
+                f"Der Bereich der Bewertungen liegt zwischen 0 und 1, aber der Minimalwert des Ratings ist {ratings_array.min()}")
     else:
         length_series = length_series if length_series is not None else 100
         ratings_array = create_random_series(
