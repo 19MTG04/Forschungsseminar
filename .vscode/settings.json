@@ -1,6 +1,9 @@
 {
     "python.analysis.extraPaths": [
         "./base_library",
-        "./accuracy_calculations"
+        "./accuracy_calculations",
+        "./believability_calculations",
+        "./objectivity_calculations",
+        "./reputation_calculations",
     ]
 }
