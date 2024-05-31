@@ -23,7 +23,7 @@ def get_dispersion_and_outlier_score_for_comparison_data(data_series: pd.Series,
 
 
 def get_outlier_stats_for_comparison(data_series: pd.Series, options: AccuracyCalculationOptions, data_points_per_timestep: pd.Series, z_score: pd.Series) -> Tuple[int, float]:
-    # Wenn mindestens 4 Vergleichsdaten vorliegen und der Wert dennoch weit abweicht, liegt ein Ausreißer vor.
+    # Wenn mindestens 5 Vergleichsdaten vorliegen und der Wert dennoch weit abweicht, liegt ein Ausreißer vor.
     number_outliers_comparison = ((z_score > options.threshold_outliers) & (
         data_points_per_timestep >= options.minimum_number_of_comparison_data)).sum()
 

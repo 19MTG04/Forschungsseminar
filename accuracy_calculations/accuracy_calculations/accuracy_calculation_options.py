@@ -34,7 +34,7 @@ class AccuracyCalculationOptions:
     multiplicator_outliers: float = 100
     multiplicator_missing_data: float = 100
 
-    minimum_number_of_comparison_data = 4
+    minimum_number_of_comparison_data = 5
 
     weights: AccuracySubcategoryWeights = field(
         default_factory=AccuracySubcategoryWeights)
