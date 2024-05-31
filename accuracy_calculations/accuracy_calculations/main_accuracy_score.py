@@ -37,8 +37,14 @@ def calculate_accuracy_score(data_series: pd.Series, accuracy_options: AccuracyC
     dispersion_score = get_dispersion_stats(
         data_series, approximation_curve, z_score, accuracy_options, window_length)
 
-    dispersion_score_comparison, outlier_score_comparison, _ = get_dispersion_and_outlier_score_for_comparison_data(
-        data_series, comparison_data, accuracy_options)
+    if len(comparison_data) >= accuracy_options.minimum_number_of_comparison_data:
+        dispersion_score_comparison, outlier_score_comparison, _ = get_dispersion_and_outlier_score_for_comparison_data(
+            data_series, comparison_data, accuracy_options)
+    else:
+        dispersion_score_comparison = 0
+        outlier_score_comparison = 0
+        accuracy_options.weights.dispersion_comparison = 0
+        accuracy_options.weights.outliers_comparison = 0
 
     accuracy_score = ((missing_data_score * accuracy_options.weights.missing_data) +
                       (outlier_score * accuracy_options.weights.outliers_intrinsic) +
