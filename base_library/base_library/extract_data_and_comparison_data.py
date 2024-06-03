@@ -122,6 +122,27 @@ def slice_dataframe(df1: pd.DataFrame, df2: pd.DataFrame, df3: pd.DataFrame, tim
     return result_df1, result_df2, result_df3, lb_index_min, ub_index_max
 
 
+def last_number_before_nan(row):
+    # Finde den Index des ersten NaN
+    first_nan_index = row.isna().idxmax() if row.isna().any() else None
+    if first_nan_index is not None:
+        # Werte vor dem ersten NaN
+        values_before_nan = row[:first_nan_index]
+        if not values_before_nan.empty:
+            return values_before_nan.dropna().iloc[-1]
+    # Wenn kein NaN vorhanden ist, oder nur NaNs vor dem ersten NaN sind
+    return row.dropna().iloc[-1] if not row.dropna().empty else np.nan
+
+
+def delete_short_rows(df: pd.DataFrame, min_length_sec: float) -> pd.DataFrame:
+    duration_of_each_series = df.apply(last_number_before_nan, axis=1)
+    filtered_durations = duration_of_each_series[duration_of_each_series >=
+                                                 min_length_sec * 1000]
+    filtered_df = df.loc[filtered_durations.index]
+
+    return filtered_df
+
+
 def delete_rows_with_different_frequency(df: pd.DataFrame, mean_diff: float) -> pd.DataFrame:
     diff_df = df.diff(axis=1).mean(axis=1)
 
@@ -241,6 +262,11 @@ def extract_data_and_comparison_data(channel_group: int, observation_feature: st
     # Löschen von NaNs aus den Serien. Wenn einer der Werte nicht vorliegt, können an dieser Stelle keine Vergleichsdaten berechnet werden
     time_channel_group, step_channel_group, observed_data_channel_group = remove_nan_entries_from_series(
         time_channel_group, step_channel_group, observed_data_channel_group)
+
+    # Wenn die Option gesetzt ist, sollen nur Zeitreihen in den Vergleich übernommen werden, die eine gewisse Dauer haben.
+    if options.minimum_comparison_data_duration_sec:
+        time_frame = delete_short_rows(
+            time_frame, options.minimum_comparison_data_duration_sec)
 
     # Berechnen der durchschnittlichen Zeit zwischen zwei Messwertaufnahmen
     # Auf dieser Basis werden die Vergleichsdaten ausgewählt.

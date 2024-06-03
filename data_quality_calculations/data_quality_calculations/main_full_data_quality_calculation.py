@@ -64,9 +64,10 @@ if __name__ == '__main__':
 
     model_type = ModelType.MODEL_WO_COMMUNITY
 
-    # comparison_data_options = ComparisonDataExtractionOptions(
-    #     period_limitations_same_dataset=[('02.10.2023 10:18:00', '02.10.2023 10:20:00'), ('06.10.2023 11:16:00', '06.10.2023 11:18:00')], period_limitations_additional_dataset=[('07.10.2023 11:16:00', '07.10.2023 19:16:00')])
-    comparison_data_options = ComparisonDataExtractionOptions()
+    comparison_data_options = ComparisonDataExtractionOptions(
+        minimum_comparison_data_duration_sec=100,
+        period_limitations_same_dataset=[],
+        period_limitations_additional_dataset=[])
 
     data_series, comparison_data = extract_data_and_comparison_data(
         channel_group, observation_feature, comparison_data_options)
