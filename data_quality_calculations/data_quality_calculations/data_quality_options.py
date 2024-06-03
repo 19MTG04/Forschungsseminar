@@ -17,6 +17,9 @@ class CategoryWeightsDataQuality:
     weight_objectivity: float = 1
     weight_reputation: float = 1
 
+    def sum_weights(self) -> float:
+        return sum(self.__dict__.values())
+
 
 @dataclass
 class DataQualityOptions:
