@@ -331,7 +331,11 @@ def get_time_series_inside_time_limitations(options: ComparisonDataExtractionOpt
         comparsion_time_series = beginning_timestep_per_series.loc[comparison_time_series_list]
 
     else:
+        # Es werden alle Daten als Vergelichsdaten aus dem selben Datensatz genommen.
+        # Da in beginning_timestep_per_series alle Daten enthalten sind, kann dies übernommen werden.
         comparsion_time_series = beginning_timestep_per_series
+        warnings.warn(
+            f"Da keine expliziten Zeiten für die Vergleichsdatensätze angegeben sind, werden alle Daten als Vergleichsdaten des selben Datensatzes angesehen.", UserWarning)
 
     relevant_series_name = f'Zeitreihe {channel_group}'
     beginning_relevant_time_series = beginning_timestep_per_series.loc[relevant_series_name]
