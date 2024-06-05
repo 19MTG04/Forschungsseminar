@@ -22,7 +22,7 @@ class ObjectivityCalculationOptions():
 
     minimum_number_of_comparison_data: int = 5
 
-    mapping_factor: float = 0.1
+    mapping_factor: float = 0.5
 
     confidence_interval_z_value: float = 2.58  # 99% Konfidenzintervall
 
