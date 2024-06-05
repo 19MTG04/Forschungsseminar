@@ -59,15 +59,34 @@ def calculate_final_score(model_type: ModelType, data_series: pd.Series, compari
 
 if __name__ == '__main__':
 
-    channel_group = 214
+    channel_group = 268
     observation_feature = "Antrieb 1  Drehzahl"
 
     model_type = ModelType.MODEL_WO_COMMUNITY
 
+    # # Bsp: Cwälz, Minimum Länge 100sec
+    # comparison_data_options = ComparisonDataExtractionOptions(
+    #     minimum_comparison_data_duration_sec=100,
+    #     period_limitations_same_dataset=[
+    #         ('12.10.2023 14:45:00', '15.10.2023 16:38:00')],
+    #     period_limitations_additional_dataset=[('20.09.2023 08:50:00', '23.09.2023 18:52:00'), ('29.09.2023 16:00:00', '05.10.2023 14:39:00'), ('06.10.2023 22:02:00', '07.10.2023 02:48:00')])
+    # Bsp: Cwälz, Ohne Minimum Länge
     comparison_data_options = ComparisonDataExtractionOptions(
-        minimum_comparison_data_duration_sec=100,
-        period_limitations_same_dataset=[],
-        period_limitations_additional_dataset=[])
+        period_limitations_same_dataset=[
+            ('12.10.2023 14:45:00', '15.10.2023 16:38:00')],
+        period_limitations_additional_dataset=[('20.09.2023 08:50:00', '23.09.2023 18:52:00'), ('29.09.2023 16:00:00', '06.10.2023 06:59:00'), ('06.10.2023 22:02:00', '07.10.2023 02:48:00')])
+
+    # # Bsp Cbetr, Minimum Länge 100sec
+    # comparison_data_options = ComparisonDataExtractionOptions(
+    #     minimum_comparison_data_duration_sec=100,
+    #     period_limitations_same_dataset=[
+    #         ('16.10.2023 06:18:00', '17.10.2023 07:21:00')],
+    #     period_limitations_additional_dataset=[('25.09.2023 16:01:00', '28.09.2023 16:22:00'), ('28.09.2023 16:23:00', '29.09.2023 15:59:00'), ('05.10.2023 14:40:00', '06.10.2023 22:01:00'), ('07.10.2023 02:49:00', '09.10.2023 22:39:00')])
+    # # Bsp Cbetr, Ohne Minimum Länge
+    # comparison_data_options = ComparisonDataExtractionOptions(
+    #     period_limitations_same_dataset=[
+    #         ('16.10.2023 06:18:00', '17.10.2023 07:21:00')],
+    #     period_limitations_additional_dataset=[('25.09.2023 16:01:00', '28.09.2023 16:22:00'), ('28.09.2023 16:23:00', '29.09.2023 15:59:00'), ('05.10.2023 14:40:00', '06.10.2023 22:01:00'), ('07.10.2023 02:49:00', '09.10.2023 22:39:00')])
 
     data_series, comparison_data = extract_data_and_comparison_data(
         channel_group, observation_feature, comparison_data_options)
@@ -87,10 +106,10 @@ if __name__ == '__main__':
     if isinstance(category_scores[3], str):
         category_score_3 = category_scores[3]
     else:
-        category_score_3 = f'{category_scores[3]:.2f}'
+        category_score_3 = f'{category_scores[3]:.3f}'
 
-    print(f'Datenqualitäts-Score: {data_quality_score:.2f}\n'
-          f'Genauigkeit: {category_scores[0]:.2f},\n'
-          f'Glaubwürdigkeit: {category_scores[1]:.2f},\n'
-          f'Objektivität: {category_scores[2]:.2f},\n'
+    print(f'Datenqualitäts-Score: {data_quality_score:.3f}\n'
+          f'Genauigkeit: {category_scores[0]:.3f},\n'
+          f'Glaubwürdigkeit: {category_scores[1]:.3f},\n'
+          f'Objektivität: {category_scores[2]:.3f},\n'
           f'Ruf: {category_score_3}')
