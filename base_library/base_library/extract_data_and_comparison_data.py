@@ -185,14 +185,15 @@ def create_comparison_data_for_all_windows(time_channel_group: pd.Series, step_c
 def check_for_overlapping_periods(periods1, periods2) -> None:
     def test_periods_overlap(periods):
         # Sortiere die Zeitspannen nach Startzeit
-        periods_sorted = sorted(periods, key=lambda x: pd.to_datetime(x[0]))
+        periods_sorted = sorted(
+            periods, key=lambda x: pd.to_datetime(x[0], format='%d.%m.%Y %H:%M:%S'))
 
         # Prüfe auf Überschneidungen
         for i in range(1, len(periods_sorted)):
             start_previous, end_previous = pd.to_datetime(
-                periods_sorted[i-1][0]), pd.to_datetime(periods_sorted[i-1][1])
+                periods_sorted[i-1][0], format='%d.%m.%Y %H:%M:%S'), pd.to_datetime(periods_sorted[i-1][1], format='%d.%m.%Y %H:%M:%S')
             start_current, end_current = pd.to_datetime(
-                periods_sorted[i][0]), pd.to_datetime(periods_sorted[i][1])
+                periods_sorted[i][0], format='%d.%m.%Y %H:%M:%S'), pd.to_datetime(periods_sorted[i][1], format='%d.%m.%Y %H:%M:%S')
             if start_current <= end_previous:
                 return True
         return False
