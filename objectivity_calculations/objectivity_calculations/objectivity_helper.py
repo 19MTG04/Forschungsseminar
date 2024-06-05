@@ -103,8 +103,7 @@ def add_relevant_dataseries_to_iterator(data_series: pd.Series, comparison_data:
 
         # Verschieben der Vergleichsdaten zum Anderen Iterator, sodass anschließend nur die relevante Vergleichsreihe im same_iterator steht
         other_iterator_df = deepcopy(same_iterator_relevant_dataseries_df)
-        same_iterator_df = pd.concat(
-            [relevant_data, same_iterator_relevant_dataseries_df.head(0)])
+        same_iterator_df = relevant_data
     else:
         # Sind mehrere Datensätze vorhanden muss dennoch diese Variable genutzt werden
         one_dataset_only = False
