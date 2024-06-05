@@ -32,7 +32,8 @@ def determine_consistency_score(data_series: pd.Series, comparison_data: pd.Data
         potential_minimum = comparison_data.min(axis=None)
         potential_maximum = comparison_data.max(axis=None)
 
-    comparison_mean = comparison_data.mean(axis=0).fillna(0).values
+    comparison_mean = comparison_data.mean(
+        axis=0).apply(pd.to_numeric).fillna(0).values
 
     consistency_score = (1 - np.abs(np.array(data_series.values) - comparison_mean) /
                          (potential_maximum - potential_minimum)).mean()

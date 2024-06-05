@@ -36,7 +36,7 @@ def score_calculation(same_iterator_df: pd.DataFrame, other_iterator_df: pd.Data
 
     z_score = mean_same_iterator.sub(mean_other_iterator)
     z_score = z_score.where(std_other_iterator != 0, 0).div(
-        std_other_iterator.where(std_other_iterator != 0, np.nan)).fillna(0).abs()
+        std_other_iterator.where(std_other_iterator != 0, np.nan)).apply(pd.to_numeric).fillna(0).abs()
 
     z_score = z_score / options.confidence_interval_z_value
 
