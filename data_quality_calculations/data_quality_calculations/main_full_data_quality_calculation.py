@@ -108,7 +108,7 @@ if __name__ == '__main__':
     else:
         category_score_3 = f'{category_scores[3]:.3f}'
 
-    print(f'Datenqualitäts-Score: {data_quality_score:.3f}\n'
+    print(f'Datenqualitäts-Score ZR {channel_group}: {data_quality_score:.3f}\n'
           f'Genauigkeit: {category_scores[0]:.3f},\n'
           f'Glaubwürdigkeit: {category_scores[1]:.3f},\n'
           f'Objektivität: {category_scores[2]:.3f},\n'
