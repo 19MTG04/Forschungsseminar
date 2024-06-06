@@ -4,7 +4,7 @@ import numpy as np
 from objectivity_calculations.objectivity_options import ObjectivityCalculationOptions
 
 
-def calculate_autocorrelation_objectivity(same_iterator_df: pd.DataFrame, other_iterator_df: pd.DataFrame, options: ObjectivityCalculationOptions) -> float:
+def calculate_autocorrelation_objectivity(same_iterator_df: pd.DataFrame, other_iterator_df: pd.DataFrame, comparison_data: pd.DataFrame, options: ObjectivityCalculationOptions) -> float:
     # Dient nur dem kürzeren Variablennamen
     horizon = options.autocorrlation_horizon
 
@@ -17,8 +17,13 @@ def calculate_autocorrelation_objectivity(same_iterator_df: pd.DataFrame, other_
     mean_same_iterator_ac = same_iterator_autocorrelation_sum.mean(axis=0)
     mean_other_iterator_ac = other_iterator_autocorrelation_sum.mean(axis=0)
 
-    autocorrelation_factor = max(mean_same_iterator_ac.mean(), mean_other_iterator_ac.mean()) / \
-        min(mean_same_iterator_ac.mean(), mean_other_iterator_ac.mean()) - 1
+    # Differenz der beiden Serien und diese dann auf die jeweilige Größenordnung in den Gesamtvergleichsdaten beziehen
+    ac_magnitude_series = (abs(mean_same_iterator_ac -
+                           mean_other_iterator_ac)) / abs(comparison_data.mean(axis=0))
+
+    # Inklusive Faktor zur Gewichtung, wie viele Daten wirklich zur Verfügung stehen.
+    autocorrelation_factor = ac_magnitude_series.mean() * (len(mean_same_iterator_ac) - mean_same_iterator_ac.isna(
+    ).sum()) / (len(mean_other_iterator_ac) - mean_other_iterator_ac.isna().sum())
 
     ac_objectivity_score = 1 - \
         (autocorrelation_factor**2) / \

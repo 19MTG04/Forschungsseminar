@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 from objectivity_calculations.objectivity_options import ObjectivityCalculationOptions
 
@@ -9,12 +10,13 @@ def calculate_variance_objectivity(same_iterator_df: pd.DataFrame, other_iterato
         std_same_iterator = same_iterator_df.std()
         std_other_iterator = other_iterator_df.std()
 
-        variance_factor = max(std_same_iterator.mean(), std_other_iterator.mean()) / \
-            min(std_same_iterator.mean(), std_other_iterator.mean()) - 1
+        # In jedem Zeitschritt wird der größere druch den kleineren Wert geteilt. Hier ist dies unproblematisch, da jeder der Werte immer >= 0 sein wird.
+        variance_factor = std_same_iterator.combine(
+            std_other_iterator, lambda x, y: max(x, y) / min(x, y) if min(x, y) != 0 else np.nan)
 
         variance_objectivity_score = 1 - \
-            (variance_factor**2) / \
-            (options.mapping_factor + variance_factor**2)
+            (variance_factor.mean()**2) / \
+            (options.mapping_factor + variance_factor.mean()**2)
     else:
         variance_objectivity_score = 0
 

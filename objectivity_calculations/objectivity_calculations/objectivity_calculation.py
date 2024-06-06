@@ -29,7 +29,7 @@ def calculate_obejectivity(data_series: pd.Series, comparison_data: pd.DataFrame
         variance_objectivity_score = calculate_variance_objectivity(
             same_iterator_df, other_iterator_df, objectivity_options)
         autocorrelation_objectivity_score = calculate_autocorrelation_objectivity(
-            same_iterator_df, other_iterator_df, objectivity_options)
+            same_iterator_df, other_iterator_df, comparison_data, objectivity_options)
 
         objectivity_score = dataset_factor * ((mean_objectivity_score * objectivity_options.weights.mean_objectivity) +
                                               (variance_objectivity_score * objectivity_options.weights.variance_objectivity) +
