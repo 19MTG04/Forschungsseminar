@@ -14,7 +14,7 @@ def get_dispersion_and_outlier_score_for_comparison_data(data_series: pd.Series,
         data_series, comparison_data, options)
 
     dispersion_score_comparison = get_dispersion_stats_for_comparison(
-        weights_for_each_timestep, z_score, options)
+        weights_for_each_timestep, z_score, comparison_data, options)
 
     number_outliers_comparison, outlier_score_comparison = get_outlier_stats_for_comparison(
         data_series, options, data_points_per_timestep, z_score)
@@ -34,19 +34,28 @@ def get_outlier_stats_for_comparison(data_series: pd.Series, options: AccuracyCa
     return number_outliers_comparison, outlier_score_comparison
 
 
-def get_dispersion_stats_for_comparison(weights_for_each_timestep: pd.Series, z_score: pd.Series, options: AccuracyCalculationOptions) -> float:
+def get_dispersion_stats_for_comparison(weights_for_each_timestep: pd.Series, z_score: pd.Series, comparison_data: pd.DataFrame, options: AccuracyCalculationOptions) -> float:
     # Damit Ausreißer nicht bei Streuung und Ausreißer schlecht bewertet werden, werden sie hier ignoriert
     z_score_wo_outliers = z_score.mask(z_score > options.threshold_outliers, 0)
 
     # Die Ausnutzung des Toleranzbandes wird auf diese Weise bestimmt
     z_score_normalized = z_score_wo_outliers / options.threshold_outliers
-    dispersion_score_comparison = (1 - (z_score_normalized * weights_for_each_timestep).sum() /
-                                   weights_for_each_timestep.sum())
+    z_score_exploitation = (1 - (z_score_normalized * weights_for_each_timestep).sum() /
+                            weights_for_each_timestep.sum())
+
+    # Bezugsgröße um zu referenzieren, wie groß ide Größenordnung der Daten ist
+    data_magnitude_reference = comparison_data.mean(axis=0).abs().max()
+
+    # Straffaktor, wenn die Standardabweichungen in den Vergleichsdaten sehr groß sind
+    penalty_magnitude_std = data_magnitude_reference / \
+        (comparison_data.std(axis=0)**2 + data_magnitude_reference)
+
+    dispersion_score_comparison = z_score_exploitation * penalty_magnitude_std
 
     return dispersion_score_comparison
 
 
-def plot_dispersion_comparison(data_series: pd.Series, comparison_data_std: pd.Series, comparison_data_mean: pd.Series, options: AccuracyCalculationOptions):
+def plot_dispersion_comparison(data_series: pd.Series, comparison_data_std: pd.Series, comparison_data_mean: pd.Series, options: AccuracyCalculationOptions) -> None:
     # Berechnung der oberen und unteren Grenzen des Toleranzbands
     upper_bound = comparison_data_mean + 2.58 * comparison_data_std
     lower_bound = comparison_data_mean - 2.58 * comparison_data_std
@@ -72,7 +81,7 @@ def plot_dispersion_comparison(data_series: pd.Series, comparison_data_std: pd.S
     plt.show()
 
 
-def comparison_data_analysis(data_series: pd.Series, comparison_data: pd.DataFrame, options: AccuracyCalculationOptions):
+def comparison_data_analysis(data_series: pd.Series, comparison_data: pd.DataFrame, options: AccuracyCalculationOptions) -> Tuple[pd.Series, pd.Series, pd.Series]:
     """
     Diese Funktion soll den z-Score für jeden Zeitpunkt der Vergleichsdaten bestimmen.
     Dieser Score gibt an, um wie viele Standardabweichungen der Wert der Zeitreihe vom Mittelwert der Vergleichsdaten abweicht.

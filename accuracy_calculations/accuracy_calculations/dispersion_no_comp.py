@@ -31,7 +31,7 @@ def get_dispersion_stats(data_series: pd.Series, approximation: pd.Series,
     data_std = data_rolling_window.std()
     approximation_std = approximation_rolling_window.std()
     std_difference = (data_std - approximation_std).abs()
-    mean_percentage_deviation = std_difference.mean() / approximation.max() * 100
+    mean_percentage_deviation = std_difference.mean() / approximation.abs().max() * 100
 
     # 1 / (x + 1) als Formel zur Bewertung des Scores, sodass:
     # 0,01 % Abweichung zu ca. 0,99 als Score führen
