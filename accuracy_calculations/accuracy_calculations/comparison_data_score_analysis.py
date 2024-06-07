@@ -50,7 +50,7 @@ def get_dispersion_stats_for_comparison(weights_for_each_timestep: pd.Series, z_
     penalty_magnitude_std = data_magnitude_reference / \
         (comparison_data.std(axis=0)**2 + data_magnitude_reference)
 
-    dispersion_score_comparison = z_score_exploitation * penalty_magnitude_std
+    dispersion_score_comparison = z_score_exploitation * penalty_magnitude_std.mean()
 
     return dispersion_score_comparison
 
@@ -78,6 +78,7 @@ def plot_dispersion_comparison(data_series: pd.Series, comparison_data_std: pd.S
              linestyle='--', color='red')
 
     plt.legend()
+    plt.xlabel("Zeit seit Erfassungsbeginn [$ms$]")
     plt.show()
 
 
