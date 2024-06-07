@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from accuracy_calculations.accuracy_calculation_options import AccuracyCalculationOptions
 from accuracy_calculations.statistical_analysis_helper import get_outlier_mask, general_dispersion_analysis
 
+from base_library.misc.path_helper import get_project_root
+
 
 def detect_outliers_intrinsic_separately(data_series: pd.Series, options: AccuracyCalculationOptions) -> Tuple[float, float, int, pd.Series, pd.Series]:
     _, approximation_curve, z_score = general_dispersion_analysis(
@@ -41,12 +43,22 @@ def get_outlier_stats(z_score: pd.Series, options: AccuracyCalculationOptions) -
 
 
 def plot_outliers(data_series: pd.Series, approximation_curve: pd.Series, outlier_mask: pd.Series) -> None:
-    data_series.plot(label='data')
-    approximation_curve.plot(label='approximation')
-    data_series[~outlier_mask].plot(label='outliers', marker='o', ls='')
-    approximation_curve[~outlier_mask].plot(
-        label='possible replacement', marker='o', ls='')
+    # Dies ist der Speicherort des Datensatzes. Die Funktion wird aus der base_library genutzt!
+    file_loading = get_project_root() / 'dataset'
+    all_time_series = pd.read_pickle(
+        file_loading / 'Zeit.pkl', compression='gzip')
+    time_series_relevant = all_time_series.loc[data_series.name].iloc[:len(
+        data_series)]
+    plt.plot(time_series_relevant, data_series,
+             label='Relevante Datenserie')
+    plt.plot(time_series_relevant, approximation_curve,
+             label='Relevante Datenserie')
+    plt.plot(time_series_relevant.loc[data_series[~outlier_mask].keys()], data_series[~outlier_mask],
+             label='Ausreißer', marker='o', ls='')
+    plt.plot(time_series_relevant.loc[data_series[~outlier_mask].keys()], approximation_curve[~outlier_mask],
+             label='Mögliche Bereinigung', marker='o', ls='')
     plt.legend()
+    plt.xlabel("Zeit seit Erfassungsbeginn [$ms$]")
     plt.show()
 
 
