@@ -34,14 +34,15 @@ def score_calculation(same_iterator_df: pd.DataFrame, other_iterator_df: pd.Data
 
     std_other_iterator = other_iterator_df.std()
 
-    z_score = mean_same_iterator.sub(mean_other_iterator)
-    z_score = z_score.where(std_other_iterator != 0, 0).div(
+    mean_difference = mean_same_iterator.sub(mean_other_iterator)
+    z_score = mean_difference.where(std_other_iterator != 0, 0).div(
         std_other_iterator.where(std_other_iterator != 0, np.nan)).apply(pd.to_numeric).fillna(0).abs()
 
-    z_score = z_score / options.confidence_interval_z_value
+    z_score_normalized = z_score / options.confidence_interval_z_value
 
     mean_objectivity_score = 1 - \
-        (z_score.mean()**2) / (options.mapping_factor + z_score.mean()**2)
+        (z_score_normalized.mean()**2) / \
+        (options.mapping_factor + z_score_normalized.mean()**2)
 
     if multiple_datasets:
         multiple_datasets_factor = 1
