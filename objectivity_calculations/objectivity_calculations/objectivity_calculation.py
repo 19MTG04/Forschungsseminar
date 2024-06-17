@@ -10,7 +10,7 @@ from base_library.extract_data_and_comparison_data import extract_data_and_compa
 from base_library.data_extraction_options import ComparisonDataExtractionOptions
 
 
-def calculate_obejectivity(data_series: pd.Series, comparison_data: pd.DataFrame, comparison_data_options: ComparisonDataExtractionOptions, objectivity_options: ObjectivityCalculationOptions) -> float:
+def calculate_objectivity(data_series: pd.Series, comparison_data: pd.DataFrame, comparison_data_options: ComparisonDataExtractionOptions, objectivity_options: ObjectivityCalculationOptions) -> float:
     same_iterator_df, other_iterator_df, one_dataset_only = extract_dataframes_for_objectivity_calculations(
         data_series, comparison_data, comparison_data_options)
 
@@ -67,6 +67,6 @@ if __name__ == '__main__':
 
     objectivity_options = create_objectivity_calculation_options(data_series)
 
-    objectivity_score = calculate_obejectivity(data_series, comparison_data,
-                                               comparison_data_options, objectivity_options)
+    objectivity_score = calculate_objectivity(data_series, comparison_data,
+                                              comparison_data_options, objectivity_options)
     print(objectivity_score)
