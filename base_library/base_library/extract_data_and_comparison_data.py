@@ -38,14 +38,19 @@ def remove_nan_entries_from_series(series1: pd.Series, series2: pd.Series, serie
     return updated_series1, updated_series2, updated_series3
 
 
-def create_comparison_data_for_one_window(time_comp: pd.Series, time_df: pd.DataFrame, n_df: pd.DataFrame, step: pd.Series, step_df: pd.DataFrame, mean_diff: float) -> pd.DataFrame:
+def create_comparison_data_for_one_window(time_comp: pd.Series, time_df: pd.DataFrame, n_df: pd.DataFrame, step: pd.Series, step_df: pd.DataFrame, mean_diff: float, options: ComparisonDataExtractionOptions) -> pd.DataFrame:
     filtered_df = pd.DataFrame(index=time_df.index, columns=time_comp)
 
     for time_index, time in time_comp.items():
         time_diff_mask = (time_df.sub(time, axis=1).abs() <= 0.1 * mean_diff)
 
         step_mask = (step_df == step[int(str(time_index))])
-        mask = time_diff_mask & step_mask
+
+        # Quick and dirty kann hier die Übereinstimmung des Steps ausgeschaltet werden
+        if options.use_data_with_same_step_only:
+            mask = time_diff_mask & step_mask
+        else:
+            mask = time_diff_mask
 
         filtered_values = n_df.where(mask)
 
@@ -174,7 +179,7 @@ def create_comparison_data_for_all_windows(time_channel_group: pd.Series, step_c
             time_df.loc[:, lb_index:ub_logical], step_df.loc[:, lb_index:ub_logical], oberserved_feature_df.loc[:, lb_index:ub_logical], time_series, mean_diff)
 
         filtered_df = create_comparison_data_for_one_window(
-            time_series, time_df_relevant, observed_feature_df_relevant, step_series, step_df_relevant, mean_diff)
+            time_series, time_df_relevant, observed_feature_df_relevant, step_series, step_df_relevant, mean_diff, options)
         df_list.append(filtered_df)
 
     # Zusammenfügen der Vergleichsdaten aller Fenster
