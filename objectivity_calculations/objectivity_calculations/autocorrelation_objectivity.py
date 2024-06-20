@@ -27,7 +27,7 @@ def calculate_autocorrelation_objectivity(same_iterator_df: pd.DataFrame, other_
 
     ac_objectivity_score = 1 - \
         (autocorrelation_factor**2) / \
-        (options.mapping_factor + autocorrelation_factor**2)
+        (options.mapping_factor / 100 + autocorrelation_factor**2)
 
     return ac_objectivity_score
 
