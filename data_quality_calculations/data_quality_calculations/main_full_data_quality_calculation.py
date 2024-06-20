@@ -69,11 +69,6 @@ if __name__ == '__main__':
     #     minimum_comparison_data_duration_sec=100,
     #     period_limitations_same_dataset=[
     #         ('12.10.2023 14:45:00', '15.10.2023 16:38:00')],
-    #     period_limitations_additional_dataset=[('20.09.2023 08:50:00', '23.09.2023 18:52:00'), ('29.09.2023 16:00:00', '05.10.2023 14:39:00'), ('06.10.2023 22:02:00', '07.10.2023 02:48:00')])
-    # # Bsp: Cwälz, Ohne Minimum Länge
-    # comparison_data_options = ComparisonDataExtractionOptions(
-    #     period_limitations_same_dataset=[
-    #         ('12.10.2023 14:45:00', '15.10.2023 16:38:00')],
     #     period_limitations_additional_dataset=[('20.09.2023 08:50:00', '23.09.2023 18:52:00'), ('29.09.2023 16:00:00', '06.10.2023 06:59:00'), ('06.10.2023 22:02:00', '07.10.2023 02:48:00')])
 
     # # Bsp Cbetr, Minimum Länge 100sec
@@ -104,12 +99,12 @@ if __name__ == '__main__':
         model_type, data_series, comparison_data, data_quality_weights, comparison_data_options, data_quality_options)
 
     if isinstance(category_scores[3], str):
-        category_score_3 = category_scores[3]
+        reputation_score = category_scores[3]
     else:
-        category_score_3 = f'{category_scores[3]:.3f}'
+        reputation_score = f'{category_scores[3]:.3f}'
 
     print(f'Datenqualitäts-Score ZR {channel_group}: {data_quality_score:.3f}\n'
           f'Genauigkeit: {category_scores[0]:.3f},\n'
           f'Glaubwürdigkeit: {category_scores[1]:.3f},\n'
           f'Objektivität: {category_scores[2]:.3f},\n'
-          f'Ruf: {category_score_3}')
+          f'Ruf: {reputation_score}')
