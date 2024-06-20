@@ -62,12 +62,12 @@ def plot_dispersion_comparison(data_series: pd.Series, comparison_data_std: pd.S
 
     # Plot der Datenreihe
     plt.plot(comparison_data_mean.index, data_series,
-             label='Relevante Datenserie')
+             label='Relevant data series')
 
     if options.threshold_outliers == 2.58:
-        label = 'Toleranzband 99% Konfidenzintervall'
+        label = 'Tolerance band 99% confidence interval'
     elif options.threshold_outliers == 1.96:
-        label = 'Toleranzband 99% Konfidenzintervall'
+        label = 'Tolerance band 95% confidence interval'
     else:
         raise ValueError(
             'Threshold richtig angegeben? Breite des Toleranzbandes nicht explizit hinterlegt.')
@@ -78,7 +78,7 @@ def plot_dispersion_comparison(data_series: pd.Series, comparison_data_std: pd.S
              linestyle='--', color='red')
 
     plt.legend()
-    plt.xlabel("Zeit seit Erfassungsbeginn [$ms$]")
+    plt.xlabel("Time since start of recording [$ms$]")
     plt.show()
 
 
