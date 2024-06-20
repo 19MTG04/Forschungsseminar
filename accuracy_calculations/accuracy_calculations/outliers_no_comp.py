@@ -50,15 +50,17 @@ def plot_outliers(data_series: pd.Series, approximation_curve: pd.Series, outlie
     time_series_relevant = all_time_series.loc[data_series.name].iloc[:len(
         data_series)]
     plt.plot(time_series_relevant, data_series,
-             label='Relevante Datenserie')
+             label='Relevant data series')
     plt.plot(time_series_relevant, approximation_curve,
-             label='Relevante Datenserie')
+             label='Approximation')
     plt.plot(time_series_relevant.loc[data_series[~outlier_mask].keys()], data_series[~outlier_mask],
-             label='Ausreißer', marker='o', ls='')
+             label='Intrinsic outlier', marker='o', ls='', c='r')
     plt.plot(time_series_relevant.loc[data_series[~outlier_mask].keys()], approximation_curve[~outlier_mask],
-             label='Mögliche Bereinigung', marker='o', ls='')
+             label='Possible replacement', marker='o', ls='', c='g')
+    plt.plot(time_series_relevant.loc[data_series[data_series.isna()].keys(
+    )], data_series[data_series[data_series.isna()].keys()-1], marker='o', c='black', label='Missing data', ls='')
     plt.legend()
-    plt.xlabel("Zeit seit Erfassungsbeginn [$ms$]")
+    plt.xlabel("Time since start of recording [$ms$]")
     plt.show()
 
 
