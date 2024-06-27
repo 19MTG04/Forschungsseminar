@@ -57,8 +57,14 @@ def plot_outliers(data_series: pd.Series, approximation_curve: pd.Series, outlie
              label='Intrinsic outlier', marker='o', ls='', c='r')
     plt.plot(time_series_relevant.loc[data_series[~outlier_mask].keys()], approximation_curve[~outlier_mask],
              label='Possible replacement', marker='o', ls='', c='g')
+
+    mean_of_before_and_after_nan = []
+    nan_indices = data_series[data_series.isna()].index.values[:]
+    for i in nan_indices:
+        mean_of_before_and_after_nan.append(
+            (data_series.iloc[i-1] + data_series.iloc[i+1]) / 2)
     plt.plot(time_series_relevant.loc[data_series[data_series.isna()].keys(
-    )], data_series[data_series[data_series.isna()].keys()-1], marker='o', c='black', label='Missing data', ls='')
+    )], mean_of_before_and_after_nan, marker='o', c='black', label='Missing data', ls='')
     plt.legend()
     plt.xlabel("Time since start of recording [$ms$]")
     plt.show()
