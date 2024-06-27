@@ -87,7 +87,7 @@ if __name__ == '__main__':
     # Bsp: Cwälz, Ohne Minimum Länge
     comparison_data_options = ComparisonDataExtractionOptions(
         period_limitations_same_dataset=[
-            ('12.10.2023 14:59:00', '15.10.2023 16:38:00')],
+            ('12.10.2023 14:45:00', '15.10.2023 16:38:00')],
         period_limitations_additional_dataset=[('20.09.2023 08:50:00', '23.09.2023 18:52:00'), ('29.09.2023 16:00:00', '06.10.2023 06:59:00'), ('06.10.2023 22:02:00', '07.10.2023 02:48:00')])
 
     # # Bsp Cbetr, Minimum Länge 100sec
