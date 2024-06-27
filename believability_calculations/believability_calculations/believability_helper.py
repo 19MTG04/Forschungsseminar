@@ -35,7 +35,9 @@ def determine_consistency_score(data_series: pd.Series, comparison_data: pd.Data
     comparison_mean = comparison_data.mean(
         axis=0).apply(pd.to_numeric).fillna(0).values
 
-    consistency_score = (1 - np.abs(np.array(data_series.values) - comparison_mean) /
+    valid_indices = ~data_series.isna()
+
+    consistency_score = (1 - np.abs(np.array(data_series[valid_indices].values) - comparison_mean[valid_indices]) /
                          (potential_maximum - potential_minimum)).mean()
 
     return consistency_score
