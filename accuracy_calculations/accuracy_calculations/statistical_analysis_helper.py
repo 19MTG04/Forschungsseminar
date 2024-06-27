@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Tuple, Any
 import numpy as np
 import pandas as pd
@@ -36,8 +37,11 @@ def regression_values(rolling_window: Any, options: AccuracyCalculationOptions) 
         poly_features = PolynomialFeatures(degree=degree, include_bias=False)
         X_poly = poly_features.fit_transform(X)
 
+        valid_indices = ~np.isnan(y)
+
         model = LinearRegression()
-        model.fit(X_poly, y)
+        model.fit(X_poly[valid_indices].reshape(-1, 1),
+                  y[valid_indices].reshape(-1, 1))
 
         # Vorhersage für den mittleren Index des Fensters
         middle_index = len(window_data) // 2
@@ -48,9 +52,11 @@ def regression_values(rolling_window: Any, options: AccuracyCalculationOptions) 
 
 
 def optimize_window_length(data_series: pd.Series, options: AccuracyCalculationOptions) -> int:
+    data_series_copy = deepcopy(data_series)
+    data_series_copy = data_series_copy.dropna()
 
     def loss_function(window_length):
-        rolling_window = data_series.rolling(
+        rolling_window = data_series_copy.rolling(
             window=round(float(window_length)), min_periods=1, center=True)
 
         if options.mode_for_window_length_identification == 'mean':
@@ -59,25 +65,25 @@ def optimize_window_length(data_series: pd.Series, options: AccuracyCalculationO
             approximation = regression_values(rolling_window, options)
 
         r2 = sum((approximation - whole_data_avg)**2) / \
-            sum((data_series - whole_data_avg)**2)
+            sum((data_series_copy - whole_data_avg)**2)
 
         difference_one_value_to_next_approx = approximation.diff().abs().dropna().sum()
-        difference_one_value_to_next_data = data_series.diff().abs().dropna().sum()
+        difference_one_value_to_next_data = data_series_copy.diff().abs().dropna().sum()
         change_rate = difference_one_value_to_next_approx / \
-            difference_one_value_to_next_data
+            difference_one_value_to_next_data  # type: ignore
 
         # Empirisch. R2 soll etwas stärker gewichtet sein, als die Glättung
         return -(change_rate - 1.3 * r2)**2
 
     # Die minimale Datenlänge muss 30 betragen, damit die optimale Fensterlänge sinnvoll berechnet werden kann.
-    if len(data_series) < 30:
+    if len(data_series_copy) < 30:
         raise ValueError(f'Die Datenlänge beträgt lediglich {len(
-            data_series)}, für eine sinnvolle Berechnung der Fensterlänge muss sie mindestens 30 betragen.')
+            data_series_copy)}, für eine sinnvolle Berechnung der Fensterlänge muss sie mindestens 30 betragen.')
 
-    whole_data_avg = data_series.mean()
+    whole_data_avg = data_series_copy.mean()
     # Minimierung der Kostenfunktion. R^2 soll möglichst groß sein, während eine Glatte Approximation vorliegen soll.
     result = minimize_scalar(loss_function, bounds=(
-        10, len(data_series) / 3), method='bounded', options={'maxiter': 100})
+        10, len(data_series_copy) / 3), method='bounded', options={'maxiter': 100})
     optimal_window_length = round(result.x)
 
     return optimal_window_length
