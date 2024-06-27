@@ -21,9 +21,8 @@ def calculate_autocorrelation_objectivity(same_iterator_df: pd.DataFrame, other_
     ac_magnitude_series = (abs(mean_same_iterator_ac -
                            mean_other_iterator_ac)) / abs(comparison_data.mean(axis=0))
 
-    # Inklusive Faktor zur Gewichtung, wie viele Daten wirklich zur Verfügung stehen.
-    autocorrelation_factor = ac_magnitude_series.mean() * (len(mean_same_iterator_ac) - mean_same_iterator_ac.isna(
-    ).sum()) / (len(mean_other_iterator_ac) - mean_other_iterator_ac.isna().sum())
+    # Vereinfachung der Schreibweise
+    autocorrelation_factor = ac_magnitude_series.mean()
 
     ac_objectivity_score = 1 - \
         (autocorrelation_factor**2) / \
