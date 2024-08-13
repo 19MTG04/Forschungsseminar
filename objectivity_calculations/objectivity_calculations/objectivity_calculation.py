@@ -1,4 +1,6 @@
 import pandas as pd
+import numpy as np
+from typing import Tuple
 
 from objectivity_calculations.objectivity_helper import extract_dataframes_for_objectivity_calculations
 from objectivity_calculations.mean_objectivity import calculate_mean_objectivity
@@ -10,12 +12,15 @@ from base_library.extract_data_and_comparison_data import extract_data_and_compa
 from base_library.data_extraction_options import ComparisonDataExtractionOptions
 
 
-def calculate_objectivity(data_series: pd.Series, comparison_data: pd.DataFrame, comparison_data_options: ComparisonDataExtractionOptions, objectivity_options: ObjectivityCalculationOptions) -> float:
+def calculate_objectivity(data_series: pd.Series, comparison_data: pd.DataFrame, comparison_data_options: ComparisonDataExtractionOptions, objectivity_options: ObjectivityCalculationOptions) -> Tuple[float, dict]:
     same_iterator_df, other_iterator_df, one_dataset_only = extract_dataframes_for_objectivity_calculations(
         data_series, comparison_data, comparison_data_options)
 
     # Wenn keine Vergleichsdaten vorhanden sind, dann ist der Score automatisch 0
     if len(other_iterator_df) == 0 and one_dataset_only:
+        mean_objectivity_score = np.nan
+        variance_objectivity_score = np.nan
+        autocorrelation_objectivity_score = np.nan
         objectivity_score = 0
     else:
         # Ansonsten kann die Berechnung ganz normal geschehen. Zum Abschluss muss jedoch berücksichtigt werden, ob einer oder mehrere Datensätze die Grundlage waren.
@@ -37,7 +42,13 @@ def calculate_objectivity(data_series: pd.Series, comparison_data: pd.DataFrame,
                                                objectivity_options.weights.autocorrelation_objectivity)
                                               ) / (objectivity_options.weights.sum_weights())
 
-    return objectivity_score
+    objectivity_subscores = {
+        'mean_objectivity_score': mean_objectivity_score,
+        'variance_objectivity_score': variance_objectivity_score,
+        'autocorrelation_objectivity_score': autocorrelation_objectivity_score
+    }
+
+    return objectivity_score, objectivity_subscores
 
 
 if __name__ == '__main__':
@@ -67,6 +78,6 @@ if __name__ == '__main__':
 
     objectivity_options = create_objectivity_calculation_options(data_series)
 
-    objectivity_score = calculate_objectivity(data_series, comparison_data,
-                                              comparison_data_options, objectivity_options)
+    objectivity_score, _ = calculate_objectivity(data_series, comparison_data,
+                                                 comparison_data_options, objectivity_options)
     print(objectivity_score)

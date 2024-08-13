@@ -1,4 +1,5 @@
 import pandas as pd
+from typing import Tuple
 
 from believability_calculations.believability_options import create_believability_options, BelievabilityOptions, determine_weight
 from believability_calculations.believability_helper import determine_rational_rules_score, determine_source_data_score, determine_consistency_score
@@ -9,7 +10,7 @@ from base_library.extract_data_and_comparison_data import extract_data_and_compa
 from base_library.data_extraction_options import ComparisonDataExtractionOptions
 
 
-def calculate_believability_score(accuracy_score: float, data_series: pd.Series, comparison_data: pd.DataFrame, believability_options: BelievabilityOptions) -> float:
+def calculate_believability_score(accuracy_score: float, data_series: pd.Series, comparison_data: pd.DataFrame, believability_options: BelievabilityOptions) -> Tuple[float, dict]:
 
     rational_rules_score = determine_rational_rules_score(
         believability_options)
@@ -33,7 +34,15 @@ def calculate_believability_score(accuracy_score: float, data_series: pd.Series,
                            (rational_rules_score * believability_options.weights.rational_rules) +
                            (source_data_score * believability_options.weights.source_data) +
                            (consistency_score * believability_options.weights.consistency)) / (believability_options.weights.sum_weights())
-    return believability_score
+
+    believability_subscores = {
+        'accuracy_score': accuracy_score,
+        'consistency_score': consistency_score,
+        'rational_rules_score': rational_rules_score,
+        'source_data_score': source_data_score
+    }
+
+    return believability_score, believability_subscores
 
 
 if __name__ == '__main__':
@@ -49,9 +58,9 @@ if __name__ == '__main__':
     data_series, comparison_data = extract_data_and_comparison_data(
         channel_group, observation_feature, comparison_data_options)
 
-    accuracy_score = determine_accuracy(
+    accuracy_score, _ = determine_accuracy(
         data_series, accuracy_options, comparison_data)
 
-    believability_score = calculate_believability_score(
+    believability_score, _ = calculate_believability_score(
         accuracy_score, data_series, comparison_data, believability_options)
     print(believability_score)

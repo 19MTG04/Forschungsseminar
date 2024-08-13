@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from typing import Tuple
 
 from accuracy_calculations.missing_data import detect_missing_data
 from accuracy_calculations.outliers_no_comp import detect_outliers_intrinsic
@@ -18,14 +19,14 @@ from base_library.data_extraction_options import ComparisonDataExtractionOptions
 # TODO: NaN-Handling ist bisher nicht überall explizit betrachtet worden!
 
 
-def determine_accuracy(data_series: pd.Series, accuracy_options: AccuracyCalculationOptions, comparison_data: pd.DataFrame = pd.DataFrame(None)) -> float:
+def determine_accuracy(data_series: pd.Series, accuracy_options: AccuracyCalculationOptions, comparison_data: pd.DataFrame = pd.DataFrame(None)) -> Tuple[float, dict]:
     sanity_check_data(data_series)
-    accuracy_score = calculate_accuracy_score(
+    accuracy_score, accuracy_subscores = calculate_accuracy_score(
         data_series, accuracy_options, comparison_data)
-    return accuracy_score
+    return accuracy_score, accuracy_subscores
 
 
-def calculate_accuracy_score(data_series: pd.Series, accuracy_options: AccuracyCalculationOptions, comparison_data: pd.DataFrame = pd.DataFrame(None)) -> float:
+def calculate_accuracy_score(data_series: pd.Series, accuracy_options: AccuracyCalculationOptions, comparison_data: pd.DataFrame = pd.DataFrame(None)) -> Tuple[float, dict]:
 
     window_length, approximation_curve, z_score = general_dispersion_analysis(
         data_series, accuracy_options)
@@ -52,7 +53,15 @@ def calculate_accuracy_score(data_series: pd.Series, accuracy_options: AccuracyC
                       (outlier_score_comparison * accuracy_options.weights.outliers_comparison) +
                       (dispersion_score_comparison * accuracy_options.weights.dispersion_comparison)) / (accuracy_options.weights.sum_weights())
 
-    return accuracy_score
+    accuracy_subscores = {
+        'missing_data_score': missing_data_score,
+        'dispersion_score': dispersion_score,
+        'outlier_score': outlier_score,
+        'dispersion_score_comparison': dispersion_score_comparison,
+        'outlier_score_comparison': outlier_score_comparison
+    }
+
+    return accuracy_score, accuracy_subscores
 
 
 def sanity_check_data(data_series: pd.Series) -> None:
@@ -73,7 +82,7 @@ if __name__ == '__main__':
         accuracy_options = AccuracyCalculationOptions(
             plot_intrinsic_outliers=True)
 
-        accuracy_score = calculate_accuracy_score(
+        accuracy_score, _ = calculate_accuracy_score(
             data_series, accuracy_options)
 
         print(f'Genauigkeits-Score: {accuracy_score:.2f}')
@@ -91,6 +100,7 @@ if __name__ == '__main__':
     data_series, comparison_data = extract_data_and_comparison_data(
         channel_group, observation_feature, comparison_data_options)
 
-    score = determine_accuracy(data_series, accuracy_options, comparison_data)
+    score, _ = determine_accuracy(
+        data_series, accuracy_options, comparison_data)
 
     print(f'Genauigkeits-Score: {score:.2f}')
