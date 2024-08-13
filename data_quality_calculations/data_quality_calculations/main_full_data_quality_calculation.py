@@ -21,11 +21,11 @@ from reputation_calculations.reputation_calculation import calculate_reputation_
 
 def calculate_final_score(model_type: ModelType, data_series: pd.Series, comparison_data: pd.DataFrame, data_quality_weights: CategoryWeightsDataQuality, comparison_data_options: ComparisonDataExtractionOptions, data_quality_options: DataQualityOptions) -> Tuple[float, Tuple[float, float, float, Union[float, str]]]:
     if model_type == ModelType.FULL_MODEL:
-        accuracy_score = determine_accuracy(
+        accuracy_score, accuracy_subscores = determine_accuracy(
             data_series, data_quality_options.accuracy_options, comparison_data)
-        believability_score = calculate_believability_score(
+        believability_score, believability_subscores = calculate_believability_score(
             accuracy_score, data_series, comparison_data, data_quality_options.believability_options)
-        objectivity_score = calculate_objectivity(
+        objectivity_score, objectivity_subscores = calculate_objectivity(
             data_series, comparison_data, comparison_data_options, data_quality_options.objectivity_options)
         reputation_score = calculate_reputation_score(
             data_quality_options.reputation_options.reputation_rating, data_quality_options.reputation_options.exponential_smoothing_factor)
@@ -40,17 +40,20 @@ def calculate_final_score(model_type: ModelType, data_series: pd.Series, compari
         data_quality_options.believability_options.weights.source_data = 0
         data_quality_weights.weight_reputation = 0
 
-        accuracy_score = determine_accuracy(
+        accuracy_score, accuracy_subscores = determine_accuracy(
             data_series, data_quality_options.accuracy_options, comparison_data)
-        believability_score = calculate_believability_score(
+        believability_score, believability_subscores = calculate_believability_score(
             accuracy_score, data_series, comparison_data, data_quality_options.believability_options)
-        objectivity_score = calculate_objectivity(
+        objectivity_score, objectivity_subscores = calculate_objectivity(
             data_series, comparison_data, comparison_data_options, data_quality_options.objectivity_options)
         reputation_score = "Keine Berechnung für diesen ModelType."
 
         data_quality_score = ((accuracy_score * data_quality_weights.weight_accuracy) +
                               (believability_score * data_quality_weights.weight_believability) +
                               (objectivity_score * data_quality_weights.weight_objectivity)) / (data_quality_weights.sum_weights())
+
+        believability_subscores['rational_rules_score'] = np.nan
+        believability_subscores['source_data_score'] = np.nan
 
     else:
         raise ValueError(f"Der Typ {model_type=} ist unbekannt.")
