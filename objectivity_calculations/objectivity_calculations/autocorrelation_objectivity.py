@@ -18,8 +18,9 @@ def calculate_autocorrelation_objectivity(same_iterator_df: pd.DataFrame, other_
     mean_other_iterator_ac = other_iterator_autocorrelation_sum.mean(axis=0)
 
     # Differenz der beiden Serien und diese dann auf die jeweilige Größenordnung in den Gesamtvergleichsdaten beziehen
-    ac_magnitude_series = (abs(mean_same_iterator_ac -
-                           mean_other_iterator_ac)) / abs(comparison_data.mean(axis=0))
+    ac_magnitude_series = abs(mean_same_iterator_ac - mean_other_iterator_ac) / \
+        np.where(comparison_data.mean(axis=0) == 0,
+                 np.nan, abs(comparison_data.mean(axis=0)))
 
     # Vereinfachung der Schreibweise
     autocorrelation_factor = ac_magnitude_series.mean()
