@@ -24,7 +24,7 @@ if __name__ == '__main__':
         for i in tqdm(range(number_rows_in_data)):
             # Daten auslesen
             try:
-                array_values = data_file.channel(i, "Zeit")
+                array_values = data_file.channel(i, observation_feature)
             except IndexError:
                 continue
 
