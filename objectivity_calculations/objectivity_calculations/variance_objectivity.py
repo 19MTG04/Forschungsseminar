@@ -12,7 +12,7 @@ def calculate_variance_objectivity(same_iterator_df: pd.DataFrame, other_iterato
 
         # In jedem Zeitschritt wird der größere druch den kleineren Wert geteilt. Hier ist dies unproblematisch, da jeder der Werte immer >= 0 sein wird.
         variance_factor = std_same_iterator.combine(
-            std_other_iterator, lambda x, y: max(x, y) / min(x, y) if min(x, y) != 0 else np.nan)
+            std_other_iterator, lambda x, y: (max(x, y) / min(x, y) - 1) if min(x, y) != 0 else np.nan)
 
         variance_objectivity_score = 1 - \
             (variance_factor.mean()**2) / \
