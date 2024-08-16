@@ -153,7 +153,8 @@ if __name__ == '__main__':
     model_type = ModelType.MODEL_WO_COMMUNITY
 
     comparison_data_options = ComparisonDataExtractionOptions(
-        # minimum_comparison_data_duration_sec=10,
+        minimum_comparison_data_duration_sec=10,
+        data_cleansing_type="raw",
         period_limitations_same_dataset=[
             ('12.10.2023 14:45:00', '15.10.2023 16:38:00')],
         period_limitations_additional_dataset=[('18.09.2023 14:00:00', '22.09.2023 20:00:00'), ('29.09.2023 16:00:00', '05.10.2023 13:30:00'), ('06.10.2023 22:02:00', '07.10.2023 02:48:00')])

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union, Literal
 
 
 @dataclass
@@ -16,6 +16,10 @@ class ComparisonDataExtractionOptions:
 
     # Diese Option entscheidet, ob der Prüfschritt an der Stelle mit in die Auswahl der Vergleichsdaten einbezogen werden soll.
     use_data_with_same_step_only: bool = False
+
+    # Diese Option entscheidet, für welche der vorgegebenen Perioden bereinigte und für welche die Rohdaten verwendet werden.
+    data_cleansing_type: Union[Literal["raw"], Literal["only_same_dataset_cleansed"],
+                               Literal["only_additional_dataset_cleansed"], Literal["full_cleansing"]] = "raw"
 
     # Durch Angabe von [('30.09.2023 12:00:00', '02.10.2023 12:00:00'), ('04.10.2023 12:00:00', '06.10.2023 12:00:00')]
     # werden nur Zeitreihen, die zwischen diesen Daten aufgenommen wurden, als Vergleichsdaten gewertet.

@@ -247,7 +247,7 @@ def extract_data_and_comparison_data(channel_group: int, observation_feature: st
 
     # Dataframes laden
     time_frame_saved, step_frame_saved, observed_feature_frame_saved = load_dataframe_data(
-        observation_feature)
+        observation_feature, channel_group, options)
 
     # Extrahieren der relevanten Zeitreihe und löschen aus dem ursprünglichen Dataframe, sodass dort nur die Vergleichsdaten betrachtet werden können
     relevant_series_channel_group, modified_dfs = extract_series_from_dfs(
@@ -352,14 +352,98 @@ def get_time_series_inside_time_limitations(options: ComparisonDataExtractionOpt
     return comparsion_time_series, beginning_relevant_time_series
 
 
-def load_dataframe_data(observation_feature: str) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    file_loading = get_project_root() / 'dataset'
+def load_dataframe_data(observation_feature: str, channel_group: int, options: ComparisonDataExtractionOptions) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    folder_raw_data = get_project_root() / 'dataset'
+    folder_cleansed_data = get_project_root() / 'dataset_cleansed'
+
     time_frame_saved = pd.read_pickle(
-        file_loading / 'Zeit.pkl', compression='gzip')
+        folder_raw_data / 'Zeit.pkl', compression='gzip')
     step_frame_saved = pd.read_pickle(
-        file_loading / 'Prüfschritt.pkl', compression='gzip')
-    observed_feature_frame_saved = pd.read_pickle(
-        file_loading / f'{observation_feature}.pkl', compression='gzip')
+        folder_raw_data / 'Prüfschritt.pkl', compression='gzip')
+
+    beginning_timestep_per_series = pd.read_pickle(
+        folder_raw_data / 'Beginn der Datenerfassung je Zeitreihe.pkl', compression='gzip')
+
+    if options.data_cleansing_type == 'raw':
+        observed_feature_frame_saved = pd.read_pickle(
+            folder_raw_data / f'{observation_feature}.pkl', compression='gzip')
+
+    elif options.data_cleansing_type == "full_cleansing":
+        observed_feature_frame_saved = pd.read_pickle(
+            folder_cleansed_data / f'{observation_feature}.pkl', compression='gzip')
+        if f"Zeitreihe {channel_group}" not in observed_feature_frame_saved:
+            raise ValueError(
+                f"In den bereinigten Daten gibt es für das Feature {observation_feature} keine Zeitreihe {channel_group}.")
+
+    # Hier wird, anders als bei den ersten beiden Fällen, nicht ein so bereits gespeichertes DataFrame geladen und verwendet.
+    # Es muss schon vorher entschieden werden, welcher Teil der gespeicherten DataFrames wie zusammengesetzt wird.
+    elif options.data_cleansing_type == "only_same_dataset_cleansed" or options.data_cleansing_type == "only_additional_dataset_cleansed":
+        if len(options.period_limitations_additional_dataset) == 0 or len(options.period_limitations_same_dataset) == 0:
+            raise ValueError(
+                f"Für die Option {options.data_cleansing_type} mmüssen Zeitraume für die beiden Datensätze explizit in den Optionen angegeben werden.")
+        observed_feature_frame_raw = pd.read_pickle(
+            folder_raw_data / f'{observation_feature}.pkl', compression='gzip')
+        observed_feature_frame_cleansed = pd.read_pickle(
+            folder_cleansed_data / f'{observation_feature}.pkl', compression='gzip')
+
+        period_limitations_datetime_same_dataset = [(datetime.strptime(start, '%d.%m.%Y %H:%M:%S'),
+                                                     datetime.strptime(end, '%d.%m.%Y %H:%M:%S'))
+                                                    for start, end in options.period_limitations_same_dataset]
+        period_limitations_datetime_additional_dataset = [(datetime.strptime(start, '%d.%m.%Y %H:%M:%S'),
+                                                           datetime.strptime(end, '%d.%m.%Y %H:%M:%S'))
+                                                          for start, end in options.period_limitations_additional_dataset]
+        same_dataset_timeseries_list = []
+        for start, end in period_limitations_datetime_same_dataset:
+            if end < start:
+                raise ValueError(
+                    f"Die untere Zeitgrenze {start} ist später als die Obere {end}")
+            elif end == start:
+                raise ValueError(
+                    f"Die untere Zeitgrenze {start} ist gleich der Oberen {end}")
+            same_dataset_timeseries_list.extend(beginning_timestep_per_series[(
+                beginning_timestep_per_series >= start) & (beginning_timestep_per_series <= end)].index)
+        same_dataset_timeseries = beginning_timestep_per_series.loc[same_dataset_timeseries_list]
+
+        other_dataset_timeseries_list = []
+        for start, end in period_limitations_datetime_additional_dataset:
+            if end < start:
+                raise ValueError(
+                    f"Die untere Zeitgrenze {start} ist später als die Obere {end}")
+            elif end == start:
+                raise ValueError(
+                    f"Die untere Zeitgrenze {start} ist gleich der Oberen {end}")
+            other_dataset_timeseries_list.extend(beginning_timestep_per_series[(
+                beginning_timestep_per_series >= start) & (beginning_timestep_per_series <= end)].index)
+        other_dataset_timeseries = beginning_timestep_per_series.loc[other_dataset_timeseries_list]
+
+        # Der Teil der Daten, die in den Optionen dem same_dataset zugeordnet wurden, werden im bereinigten Zustand eingeladen.
+        # Der Teil aus dem additional_dataset als Rohdaten.
+        if options.data_cleansing_type == "only_same_dataset_cleansed":
+            valid_index = observed_feature_frame_cleansed.index.intersection(
+                same_dataset_timeseries.index)
+            df1 = observed_feature_frame_cleansed.loc[valid_index]
+            df2 = observed_feature_frame_raw.loc[other_dataset_timeseries.index]
+            observed_feature_frame_saved = pd.concat([df1, df2], axis=0)
+            if f"Zeitreihe {channel_group}" not in observed_feature_frame_saved:
+                raise ValueError(
+                    f"In den bereinigten Daten gibt es für das Feature {observation_feature} keine Zeitreihe {channel_group}.")
+
+        # Der Teil der Daten, die in den Optionen dem same_dataset zugeordnet wurden, werden als Rohdaten eingeladen.
+        # Der Teil aus dem additional_dataset als bereinigte Daten.
+        elif options.data_cleansing_type == "only_additional_dataset_cleansed":
+            valid_index = observed_feature_frame_cleansed.index.intersection(
+                other_dataset_timeseries.index)
+            df1 = observed_feature_frame_cleansed.loc[valid_index]
+            df2 = observed_feature_frame_raw.loc[same_dataset_timeseries.index]
+            observed_feature_frame_saved = pd.concat([df1, df2], axis=0)
+
+        else:
+            raise ValueError(
+                "Wie konnte hier ein anderer Cleansing Type ankommen?")
+
+    else:
+        raise ValueError(
+            f"Data cleansing type {options.data_cleansing_type} not known.")
 
     return time_frame_saved, step_frame_saved, observed_feature_frame_saved
 
