@@ -135,11 +135,11 @@ def write_results_to_csv(data_quality_score: float,
     if os.path.exists(file_path):
         # Datei existiert bereits, füge eine neue Spalte hinzu
         df = pd.read_csv(file_path)
-        df[f"Channel group: {channel_group}"] = data
+        df[f"Zeitreihe {channel_group}"] = data
     else:
         # Datei existiert noch nicht, erstelle sie und füge Daten hinzu
         df = pd.DataFrame({"Kategorien": categories})
-        df[f"Channel group: {channel_group}"] = data
+        df[f"Zeitreihe {channel_group}"] = data
 
     # Speichere die Datei
     df.to_csv(file_path, index=False)
