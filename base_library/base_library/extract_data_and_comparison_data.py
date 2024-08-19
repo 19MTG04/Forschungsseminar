@@ -371,7 +371,7 @@ def load_dataframe_data(observation_feature: str, channel_group: int, options: C
     elif options.data_cleansing_type == "full_cleansing":
         observed_feature_frame_saved = pd.read_pickle(
             folder_cleansed_data / f'{observation_feature}.pkl', compression='gzip')
-        if f"Zeitreihe {channel_group}" not in observed_feature_frame_saved:
+        if f"Zeitreihe {channel_group}" not in observed_feature_frame_saved.index:
             raise ValueError(
                 f"In den bereinigten Daten gibt es für das Feature {observation_feature} keine Zeitreihe {channel_group}.")
 
@@ -424,7 +424,7 @@ def load_dataframe_data(observation_feature: str, channel_group: int, options: C
             df1 = observed_feature_frame_cleansed.loc[valid_index]
             df2 = observed_feature_frame_raw.loc[other_dataset_timeseries.index]
             observed_feature_frame_saved = pd.concat([df1, df2], axis=0)
-            if f"Zeitreihe {channel_group}" not in observed_feature_frame_saved:
+            if f"Zeitreihe {channel_group}" not in observed_feature_frame_saved.index:
                 raise ValueError(
                     f"In den bereinigten Daten gibt es für das Feature {observation_feature} keine Zeitreihe {channel_group}.")
 
