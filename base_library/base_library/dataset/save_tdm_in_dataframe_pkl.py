@@ -36,10 +36,10 @@ if __name__ == '__main__':
             dfs.append(temp_df)
 
         # Verbinden aller DataFrames in der Liste zu einem einzigen DataFrame
-        df_of_observated_feature = pd.concat(dfs, axis=0)
-        # df_of_observated_feature.to_pickle(filepath_saving, compression='gzip')
+        df_of_observed_feature = pd.concat(dfs, axis=0)
+        # df_of_observed_feature.to_pickle(filepath_saving, compression='gzip')
 
-        print(df_of_observated_feature)
+        print(df_of_observed_feature)
 
     # Zeitpunkt der Datenerfassung für jede Zeitreihe erfassen
     number_time_series = []
