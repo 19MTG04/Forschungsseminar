@@ -422,7 +422,9 @@ def load_dataframe_data(observation_feature: str, channel_group: int, options: C
             valid_index = observed_feature_frame_cleansed.index.intersection(
                 same_dataset_timeseries.index)
             df1 = observed_feature_frame_cleansed.loc[valid_index]
-            df2 = observed_feature_frame_raw.loc[other_dataset_timeseries.index]
+            valid_index_2 = observed_feature_frame_raw.index.intersection(
+                other_dataset_timeseries.index)
+            df2 = observed_feature_frame_raw.loc[valid_index_2]
             observed_feature_frame_saved = pd.concat([df1, df2], axis=0)
             if f"Zeitreihe {channel_group}" not in observed_feature_frame_saved.index:
                 raise ValueError(
@@ -434,7 +436,9 @@ def load_dataframe_data(observation_feature: str, channel_group: int, options: C
             valid_index = observed_feature_frame_cleansed.index.intersection(
                 other_dataset_timeseries.index)
             df1 = observed_feature_frame_cleansed.loc[valid_index]
-            df2 = observed_feature_frame_raw.loc[same_dataset_timeseries.index]
+            valid_index_2 = observed_feature_frame_raw.index.intersection(
+                same_dataset_timeseries.index)
+            df2 = observed_feature_frame_raw.loc[valid_index_2]
             observed_feature_frame_saved = pd.concat([df1, df2], axis=0)
 
         else:
