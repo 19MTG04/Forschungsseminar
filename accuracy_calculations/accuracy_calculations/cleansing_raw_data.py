@@ -52,10 +52,10 @@ def cleanse_data(observation_feature: str, df_of_observed_feature_partly_cleanse
             csv_data[df_name] = pd.read_csv(
                 os.path.join(results_path, csv_file_matching), index_col=0)
 
-        # Alle Indexe finden, bei denen der Ausreißerscore im Vergleich kleiner 0,1 war.
+        # Alle Indexe finden, bei denen der Ausreißerscore im Vergleich kleiner 0,15 war.
         indexes_of_timeseries_to_exclude = set()
         for df in csv_data.values():
-            indexes = df.columns[df.loc['Outliers comparison'] < 0.1]
+            indexes = df.columns[df.loc['Outliers comparison'] < 0.15]
             indexes_of_timeseries_to_exclude.update(indexes)
 
         # Bereinigen der Daten durch die gefundenen Indizes
