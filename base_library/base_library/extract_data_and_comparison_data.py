@@ -12,7 +12,7 @@ from base_library.misc.path_helper import get_project_root
 def sanity_check_origin_data(time_comp_unfiltered: pd.Series, step_unfiltered: pd.Series, observed_feature_unfiltered: pd.Series) -> None:
     if not len(time_comp_unfiltered) == len(step_unfiltered) == len(observed_feature_unfiltered):
         raise ValueError(
-            f"Sind Sie sicher, dass die Ausgangsdaten zusammengehörig sind? Die Länge der Serien ist unterschiedlich ({len(time_comp_unfiltered)} vs. {len(step_unfiltered)}).")
+            f"Sind Sie sicher, dass die Ausgangsdaten zusammengehörig sind? Die Länge der Serien ist unterschiedlich ({len(time_comp_unfiltered)} vs. {len(step_unfiltered)} vs. {len(observed_feature_unfiltered)}).")
 
 
 def synchronize_indices(*dfs: pd.DataFrame) -> List[pd.DataFrame]:
